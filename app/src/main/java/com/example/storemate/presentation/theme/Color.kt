@@ -1,4 +1,4 @@
-package com.example.storemate.ui.theme
+package com.example.storemate.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

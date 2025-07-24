@@ -1,4 +1,4 @@
-package com.example.storemate.ui.theme
+package com.example.storemate.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
