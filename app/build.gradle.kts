@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,4 +69,5 @@ dependencies {
     testImplementation(libs.io.mockk.android)
     testImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.kotlinx.coroutines.android)
+    testImplementation(libs.org.robolectric)
 }

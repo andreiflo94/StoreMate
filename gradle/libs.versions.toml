@@ -18,6 +18,8 @@ hiltAndroidCompilerVersion = "2.48"
 mockkVersion = "1.14.0"
 kotlinxCoroutinesAndroid = "1.8.1"
 kotlinxCoroutinesTest = "1.7.3"
+coreKtxVersion = "1.6.1"
+roboelectricVersion = "4.15"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,9 +43,11 @@ hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref
 hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltCompiler" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hiltAndroidCompilerVersion" }
 io-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
-io-mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockkVersion"}
+io-mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockkVersion" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+org-robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "roboelectricVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -51,4 +55,3 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hiltPlugin = { id = "com.google.dagger.hilt.android", version.ref = "hiltPlugin" }
-
