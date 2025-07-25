@@ -1,4 +1,4 @@
-package com.example.storemate.repository
+package com.example.storemate.data
 
 import com.example.storemate.data.dbentities.ProductEntity
 import com.example.storemate.data.dbentities.SupplierEntity

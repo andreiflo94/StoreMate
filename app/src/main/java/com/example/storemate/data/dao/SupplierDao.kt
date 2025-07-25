@@ -2,6 +2,7 @@ package com.example.storemate.data.dao
 
 import androidx.room.*
 import com.example.storemate.data.dbentities.SupplierEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SupplierDao {
@@ -17,6 +18,9 @@ interface SupplierDao {
 
     @Query("SELECT * FROM SupplierEntity ORDER BY name ASC")
     suspend fun getAll(): List<SupplierEntity>
+
+    @Query("SELECT * FROM SupplierEntity ORDER BY name ASC")
+    fun getAllFlow(): Flow<List<SupplierEntity>>
 
     @Query("SELECT * FROM SupplierEntity WHERE id = :id")
     suspend fun getById(id: Int): SupplierEntity?

@@ -1,27 +1,35 @@
 package com.example.storemate.common
 
-import android.content.Context
 import androidx.room.Room
 import com.example.storemate.data.StoreMateDb
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import com.example.storemate.data.repositories.InventoryRepositoryImpl
+import com.example.storemate.domain.repositories.InventoryRepository
+import com.example.storemate.presentation.viewmodels.AddProductViewModel
+import com.example.storemate.presentation.viewmodels.AddSupplierViewModel
+import com.example.storemate.presentation.viewmodels.DashboardViewModel
+import com.example.storemate.presentation.viewmodels.ProductListViewModel
+import org.koin.android.ext.koin.androidApplication
+import org.koin.core.module.dsl.viewModel
+import org.koin.dsl.module
 
-@Module
-@InstallIn(SingletonComponent::class)
-object AppModule {
+val appModule = module {
 
-    @Provides
-    @Singleton
-    fun provideAppDatabase(@ApplicationContext applicationContext: Context): StoreMateDb {
-        val db = Room.databaseBuilder(
-            applicationContext,
+    single {
+        Room.databaseBuilder(
+            androidApplication(),
             StoreMateDb::class.java,
             "inventory_db"
         ).build()
-        return db
     }
+
+    single<InventoryRepository> {
+        InventoryRepositoryImpl(
+            get<StoreMateDb>()
+        )
+    }
+
+    viewModel { DashboardViewModel(get()) }
+    viewModel { ProductListViewModel(get()) }
+    viewModel { AddProductViewModel(get()) }
+    viewModel { AddSupplierViewModel(get())}
 }

@@ -2,6 +2,7 @@ package com.example.storemate.data.dao
 
 import androidx.room.*
 import com.example.storemate.data.dbentities.ProductEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductDao {
@@ -14,6 +15,9 @@ interface ProductDao {
 
     @Delete
     suspend fun delete(productEntity: ProductEntity)
+
+    @Query("SELECT * FROM ProductEntity ORDER BY name ASC")
+    fun getAllFlow(): Flow<List<ProductEntity>>
 
     @Query("SELECT * FROM ProductEntity ORDER BY name ASC")
     suspend fun getAll(): List<ProductEntity>

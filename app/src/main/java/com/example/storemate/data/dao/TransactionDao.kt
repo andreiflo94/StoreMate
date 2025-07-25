@@ -12,6 +12,9 @@ interface TransactionDao {
     @Query("SELECT * FROM TransactionEntity ORDER BY date DESC")
     suspend fun getAll(): List<TransactionEntity>
 
+    @Query("SELECT * FROM TransactionEntity ORDER BY date DESC LIMIT :limit")
+    suspend fun getRecentTransactions(limit: Int): List<TransactionEntity>
+
     @Query("SELECT * FROM TransactionEntity WHERE type = :type ORDER BY date DESC")
     suspend fun getByType(type: String): List<TransactionEntity>
 

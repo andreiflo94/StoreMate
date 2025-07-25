@@ -7,6 +7,8 @@ import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.model.Transaction
 import com.example.storemate.domain.repositories.InventoryRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class InventoryRepositoryImpl(db: StoreMateDb) : InventoryRepository {
 
@@ -15,6 +17,9 @@ class InventoryRepositoryImpl(db: StoreMateDb) : InventoryRepository {
     private val transactionDao = db.transactionDao()
 
     //region Products
+    override fun getAllProductsFlow(): Flow<List<Product>> =
+        productDao.getAllFlow().map { it.map { productEntity -> productEntity.toDomain() } }
+
     override suspend fun getAllProducts(): List<Product> =
         productDao.getAll().map { it.toDomain() }
 
@@ -44,6 +49,9 @@ class InventoryRepositoryImpl(db: StoreMateDb) : InventoryRepository {
     //endregion
 
     //region Suppliers
+    override fun getAllSuppliersFlow(): Flow<List<Supplier>> =
+        supplierDao.getAllFlow().map { it.map { supplierEntity ->  supplierEntity.toDomain() } }
+
     override suspend fun getAllSuppliers(): List<Supplier> =
         supplierDao.getAll().map { it.toDomain() }
 
@@ -66,6 +74,9 @@ class InventoryRepositoryImpl(db: StoreMateDb) : InventoryRepository {
     //region Transactions
     override suspend fun getAllTransactions(): List<Transaction> =
         transactionDao.getAll().map { it.toDomain() }
+
+    override suspend fun getRecentTransactions(limit: Int): List<Transaction> =
+        transactionDao.getRecentTransactions(limit).map { it.toDomain() }
 
     override suspend fun getTransactionsByType(type: String): List<Transaction> =
         transactionDao.getByType(type).map { it.toDomain() }

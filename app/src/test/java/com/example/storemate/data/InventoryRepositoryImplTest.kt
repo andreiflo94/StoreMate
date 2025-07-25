@@ -1,6 +1,5 @@
-package com.example.storemate.repository
+package com.example.storemate.data
 
-import com.example.storemate.data.StoreMateDb
 import com.example.storemate.data.dao.ProductDao
 import com.example.storemate.data.dao.SupplierDao
 import com.example.storemate.data.dao.TransactionDao

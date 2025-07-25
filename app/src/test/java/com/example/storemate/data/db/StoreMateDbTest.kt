@@ -1,4 +1,4 @@
-package com.example.storemate.repository.db
+package com.example.storemate.data.db
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
