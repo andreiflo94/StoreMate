@@ -5,7 +5,7 @@ import android.content.Context
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.tasks.await
 
 class BarcodeScanner(
@@ -19,11 +19,11 @@ class BarcodeScanner(
         .build()
 
     private val scanner = GmsBarcodeScanning.getClient(appContext, options)
-    val barCodeResults = MutableStateFlow<String?>(null)
+    val barCodeResults = MutableSharedFlow<String?>()
 
     suspend fun startScan() {
         val result = scanner.startScan().await()
-        barCodeResults.value = result.rawValue
+        barCodeResults.emit(result.rawValue)
     }
 
 }
