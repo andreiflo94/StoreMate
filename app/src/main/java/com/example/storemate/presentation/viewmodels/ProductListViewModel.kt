@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
@@ -45,28 +46,36 @@ class ProductListViewModel(
                 _selectedSupplierId,
                 repository.getAllProductsFlow()
             ) { query, category, supplierId, products ->
+                Triple(query, category, supplierId) to products
+            }.catch { throwable ->
+                _uiState.value = UiState.Error("Filtering failed: ${throwable.message}")
+            }.collectLatest { (filters, products) ->
+                val (query, category, supplierId) = filters
+
                 val filtered = products.filter { product ->
-                    val matchesQuery = query.isBlank() || product.name.contains(query, ignoreCase = true)
+                    val matchesQuery =
+                        query.isBlank() || product.name.contains(query, ignoreCase = true)
                     val matchesCategory = category == null || product.category == category
-                    val matchesSupplier = supplierId == null || product.supplierId == supplierId.toInt()
+                    val matchesSupplier =
+                        supplierId == null || product.supplierId == supplierId.toInt()
                     matchesQuery && matchesCategory && matchesSupplier
                 }
 
-                val currentState = (_uiState.value as? UiState.Success)?.data
-                if (currentState != null) {
-                    _uiState.value = UiState.Success(
-                        currentState.copy(
-                            products = filtered,
-                            searchQuery = query,
-                            selectedCategory = category,
-                            selectedSupplierId = supplierId
-                        )
-                    )
-                }
-            }.catch {
-                _uiState.value = UiState.Error("Filtering failed: ${it.message}")
-            }.collect{
+                val currentState =
+                    (_uiState.value as? UiState.Success)?.data ?: return@collectLatest
 
+                val suppliers = repository.getAllSuppliers()
+
+                _uiState.value = UiState.Success(
+                    currentState.copy(
+                        products = filtered,
+                        searchQuery = query,
+                        selectedCategory = category,
+                        selectedSupplierId = supplierId,
+                        categories = products.map { it.category }.distinct(),
+                        suppliers = suppliers.map { it.id to it.name }
+                    )
+                )
             }
         }
     }
