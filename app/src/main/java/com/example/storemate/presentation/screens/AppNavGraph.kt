@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -114,7 +113,6 @@ fun AppNavGraph(
                             }
 
                             is AddSupplierEffect.ShowError -> snackbarHostState.showSnackbar(
-                                duration = SnackbarDuration.Long,
                                 message = effect.message
                             )
                         }
@@ -138,14 +136,12 @@ fun AppNavGraph(
 
                             is ProductListEffect.ShowErrorToUi -> {
                                 snackbarHostState.showSnackbar(
-                                    duration = SnackbarDuration.Long,
                                     message = "Error:" + effect.message
                                 )
                             }
 
                             is ProductListEffect.ShowMessageToUi -> {
                                 snackbarHostState.showSnackbar(
-                                    duration = SnackbarDuration.Long,
                                     message = effect.message
                                 )
                             }
@@ -177,7 +173,6 @@ fun AppNavGraph(
                             }
 
                             is AddProductEffect.ShowError -> snackbarHostState.showSnackbar(
-                                duration = SnackbarDuration.Long,
                                 message = effect.message
                             )
 
@@ -205,14 +200,12 @@ fun AppNavGraph(
 
                             is SupplierListEffect.ShowErrorToUi -> {
                                 snackbarHostState.showSnackbar(
-                                    duration = SnackbarDuration.Long,
                                     message = effect.message
                                 )
                             }
 
                             is SupplierListEffect.ShowMessageToUi -> {
                                 snackbarHostState.showSnackbar(
-                                    duration = SnackbarDuration.Long,
                                     message = effect.message
                                 )
                             }
@@ -252,14 +245,12 @@ fun AppNavGraph(
 
                             is TransactionListEffect.ShowErrorToUi -> {
                                 snackbarHostState.showSnackbar(
-                                    duration = SnackbarDuration.Long,
                                     message = effect.message
                                 )
                             }
 
                             is TransactionListEffect.ShowMessageToUi -> {
                                 snackbarHostState.showSnackbar(
-                                    duration = SnackbarDuration.Long,
                                     message = effect.message
                                 )
                             }

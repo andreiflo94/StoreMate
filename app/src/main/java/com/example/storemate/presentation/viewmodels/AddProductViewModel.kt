@@ -10,6 +10,7 @@ import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -102,6 +103,9 @@ class AddProductViewModel(
                     try {
                         barcodeScanner.startScan()
                     } catch (e: Exception) {
+                        if (e is CancellationException) {
+                            return@launch
+                        }
                         sendError("There was an error scanning the barcode")
                     }
                 }

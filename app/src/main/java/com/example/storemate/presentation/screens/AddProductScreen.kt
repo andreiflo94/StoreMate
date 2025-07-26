@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -134,37 +133,35 @@ fun AddProductScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        OutlinedButton(
+            onClick = {
+                onIntent(AddProductIntent.ScanBarcode)
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
-            OutlinedTextField(
-                value = state.barcode,
-                onValueChange = { onIntent(AddProductIntent.BarcodeChanged(it)) },
-                label = { Text("Barcode") },
-                singleLine = true,
-                modifier = Modifier.weight(0.7f),
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
-
-            Button(
-                modifier = Modifier
-                    .weight(.3f)
-                    .align(Alignment.CenterVertically),
-                onClick = {
-                    onIntent(AddProductIntent.ScanBarcode)
-                }) {
-                Text("Scan code")
-            }
+            Text("Scan code")
+            Icon(Icons.Default.Add, contentDescription = null)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedButton(onClick = {
-            onIntent(AddProductIntent.NavigateToNewSupplier)
-        }) {
+        OutlinedTextField(
+            value = state.barcode,
+            onValueChange = { onIntent(AddProductIntent.BarcodeChanged(it)) },
+            label = { Text("Barcode") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = {
+                onIntent(AddProductIntent.NavigateToNewSupplier)
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Text("Add new supplier")
             Icon(Icons.Default.Add, contentDescription = null)
         }
