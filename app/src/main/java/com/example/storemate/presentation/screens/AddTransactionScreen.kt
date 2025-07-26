@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -107,8 +108,13 @@ fun AddTransactionScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val keyboardController = LocalSoftwareKeyboardController.current
+
         Button(
-            onClick = { onIntent(AddTransactionIntent.SubmitTransaction) },
+            onClick = {
+                keyboardController?.hide()
+                onIntent(AddTransactionIntent.SubmitTransaction)
+            },
             enabled = !state.isSubmitting,
             modifier = Modifier.fillMaxWidth()
         ) {
