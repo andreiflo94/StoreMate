@@ -114,6 +114,7 @@ sealed interface AddProductIntent {
     data class MinimumStockLevelChanged(val level: String) : AddProductIntent
     data object NavigateToNewSupplier: AddProductIntent
     data object SaveProduct : AddProductIntent
+    data object ScanBarcode : AddProductIntent
 }
 
 sealed interface AddProductEffect {

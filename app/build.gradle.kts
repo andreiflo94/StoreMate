@@ -83,4 +83,6 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.org.robolectric)
+    implementation(libs.codescanner)
+    implementation(libs.gpsCoroutines)
 }

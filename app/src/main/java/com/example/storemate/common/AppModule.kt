@@ -31,9 +31,13 @@ val appModule = module {
         )
     }
 
+    single<BarcodeScanner> {
+        BarcodeScanner(androidApplication())
+    }
+
     viewModel { DashboardViewModel(get()) }
     viewModel { ProductListViewModel(get()) }
-    viewModel { AddProductViewModel(get()) }
+    viewModel { AddProductViewModel(get(), get()) }
     viewModel { AddSupplierViewModel(get()) }
     viewModel { SupplierListViewModel(get()) }
     viewModel { TransactionListViewModel(get()) }

@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -73,10 +76,12 @@ fun AddProductScreen(
     state: AddProductScreenState,
     onIntent: (AddProductIntent) -> Unit
 ) {
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
     ) {
         Text(text = state.screenTitle, style = MaterialTheme.typography.headlineSmall)
@@ -129,14 +134,31 @@ fun AddProductScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = state.barcode,
-            onValueChange = { onIntent(AddProductIntent.BarcodeChanged(it)) },
-            label = { Text("Barcode") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            OutlinedTextField(
+                value = state.barcode,
+                onValueChange = { onIntent(AddProductIntent.BarcodeChanged(it)) },
+                label = { Text("Barcode") },
+                singleLine = true,
+                modifier = Modifier.weight(0.7f),
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Button(
+                modifier = Modifier
+                    .weight(.3f)
+                    .align(Alignment.CenterVertically),
+                onClick = {
+                    onIntent(AddProductIntent.ScanBarcode)
+                }) {
+                Text("Scan code")
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -192,6 +214,20 @@ fun AddProductScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = state.minimumStockLevel,
+            onValueChange = { newValue ->
+                val filtered = newValue.filter { it.isDigit() }
+                onIntent(AddProductIntent.MinimumStockLevelChanged(filtered))
+            },
+            label = { Text("Minimum Stock Level") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Row(
             horizontalArrangement = Arrangement.End,

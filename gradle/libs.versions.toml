@@ -21,6 +21,9 @@ navigationComposeJvmstubs = "2.9.2"
 koinVersion = "4.1.0"
 uiTestJunit4Android = "1.8.3"
 turbineVersion = "1.2.1"
+gpsCoroutines = "1.6.4"
+code-scanner = "16.0.0"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -53,6 +56,8 @@ koin-test = { module = "io.insert-koin:koin-test-junit4", version.ref = "koinVer
 koin-android-test = { module = "io.insert-koin:koin-android-test", version.ref = "koinVersion" }
 androidx-ui-test-junit4-android = { group = "androidx.compose.ui", name = "ui-test-junit4-android", version.ref = "uiTestJunit4Android" }
 turbine = {group = "app.cash.turbine", name = "turbine", version.ref = "turbineVersion"}
+codescanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "code-scanner" }
+gpsCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "gpsCoroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

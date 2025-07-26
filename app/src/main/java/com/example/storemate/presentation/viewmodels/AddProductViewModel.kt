@@ -2,6 +2,7 @@ package com.example.storemate.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.storemate.common.BarcodeScanner
 import com.example.storemate.domain.model.AddProductEffect
 import com.example.storemate.domain.model.AddProductIntent
 import com.example.storemate.domain.model.AddProductScreenState
@@ -18,7 +19,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class AddProductViewModel(
-    private val repository: InventoryRepository
+    private val repository: InventoryRepository,
+    private val barcodeScanner: BarcodeScanner
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<AddProductScreenState>>(UiState.Loading)
@@ -31,6 +33,7 @@ class AddProductViewModel(
     private var productIdToEdit: Int? = null
 
     init {
+        observeBarcodeScan()
         observeSuppliers()
     }
 
@@ -52,6 +55,18 @@ class AddProductViewModel(
                         isSaving = false
                     )
                     productIdToEdit = productId
+                }
+            }
+        }
+    }
+
+    private fun observeBarcodeScan() {
+        viewModelScope.launch {
+            barcodeScanner.barCodeResults.collect { barcode ->
+                barcode?.let {
+                    updateState(
+                        barcode = barcode
+                    )
                 }
             }
         }
@@ -81,7 +96,16 @@ class AddProductViewModel(
             is AddProductIntent.CurrentStockLevelChanged -> updateState(currentStockLevel = intent.level)
             is AddProductIntent.MinimumStockLevelChanged -> updateState(minimumStockLevel = intent.level)
             is AddProductIntent.NavigateToNewSupplier -> navigateToAddSupplier()
-            AddProductIntent.SaveProduct -> saveProduct()
+            is AddProductIntent.SaveProduct -> saveProduct()
+            AddProductIntent.ScanBarcode -> {
+                viewModelScope.launch {
+                    try {
+                        barcodeScanner.startScan()
+                    } catch (e: Exception) {
+                        sendError("There was an error scanning the barcode")
+                    }
+                }
+            }
         }
     }
 
