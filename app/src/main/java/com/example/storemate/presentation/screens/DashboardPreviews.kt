@@ -2,7 +2,7 @@ package com.example.storemate.presentation.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.storemate.domain.model.DashboardData
+import com.example.storemate.domain.model.DashboardScreenState
 import com.example.storemate.domain.model.sampleProducts
 import com.example.storemate.domain.model.sampleTransactions
 import com.example.storemate.presentation.UiState
@@ -11,7 +11,7 @@ import com.example.storemate.presentation.UiState
 @Composable
 fun PreviewDashboardContent() {
     DashboardContent(
-        dashboardData = DashboardData(
+        dashboardScreenState = DashboardScreenState(
             lowStockItems = sampleProducts,
             recentTransactions = sampleTransactions
         ),
@@ -34,19 +34,19 @@ fun PreviewLowStockSectionEmpty() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewRecentTransactionsSection() {
-    RecentTransactionsSection(sampleTransactions)
+    RecentTransactionsSection(onIntent = {}, sampleTransactions)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewRecentTransactionsSectionEmpty() {
-    RecentTransactionsSection(emptyList())
+    RecentTransactionsSection(onIntent = {}, emptyList())
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewQuickAccessSection() {
-    QuickAccessSection(onClick = {})
+    QuickAccessSection(onIntent = {})
 }
 
 @Preview(showBackground = true, name = "Dashboard - Loading")
@@ -54,7 +54,7 @@ fun PreviewQuickAccessSection() {
 fun DashboardScreenLoadingPreview() {
     DashboardScreen(
         uiState = UiState.Loading,
-        onQuickAccessClick = {}
+        onIntent = {}
     )
 }
 
@@ -63,7 +63,7 @@ fun DashboardScreenLoadingPreview() {
 fun DashboardScreenErrorPreview() {
     DashboardScreen(
         uiState = UiState.Error("Failed to load dashboard data."),
-        onQuickAccessClick = {}
+        onIntent = {}
     )
 }
 
@@ -72,11 +72,11 @@ fun DashboardScreenErrorPreview() {
 fun DashboardScreenSuccessPreview() {
     DashboardScreen(
         uiState = UiState.Success(
-            DashboardData(
+            DashboardScreenState(
                 lowStockItems = sampleProducts,
                 recentTransactions = sampleTransactions
             )
         ),
-        onQuickAccessClick = {}
+        onIntent = {}
     )
 }

@@ -8,9 +8,6 @@
       <SelectionState runConfigName="ProductsScreenTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="screen_displays_products_when_loaded()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="productsScreen_filters_products_by_search_and_category()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>

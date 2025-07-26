@@ -35,6 +35,9 @@ class InventoryRepositoryImpl(db: StoreMateDb) : InventoryRepository {
     override suspend fun deleteProduct(product: Product) =
         productDao.delete(product.toEntity())
 
+    override fun getLowStockProductsFlow(): Flow<List<Product>> =
+        productDao.getLowStockFlow().map { it.map { it.toDomain() } }
+
     override suspend fun getLowStockProducts(): List<Product> =
         productDao.getLowStock().map { it.toDomain() }
 
@@ -50,7 +53,7 @@ class InventoryRepositoryImpl(db: StoreMateDb) : InventoryRepository {
 
     //region Suppliers
     override fun getAllSuppliersFlow(): Flow<List<Supplier>> =
-        supplierDao.getAllFlow().map { it.map { supplierEntity ->  supplierEntity.toDomain() } }
+        supplierDao.getAllFlow().map { it.map { supplierEntity -> supplierEntity.toDomain() } }
 
     override suspend fun getAllSuppliers(): List<Supplier> =
         supplierDao.getAll().map { it.toDomain() }
@@ -72,8 +75,15 @@ class InventoryRepositoryImpl(db: StoreMateDb) : InventoryRepository {
     //endregion
 
     //region Transactions
+    override fun getAllTransactionsFlow(): Flow<List<Transaction>> =
+        transactionDao.getAllFlow()
+            .map { it.map { transactionEntity -> transactionEntity.toDomain() } }
+
     override suspend fun getAllTransactions(): List<Transaction> =
         transactionDao.getAll().map { it.toDomain() }
+
+    override fun getRecentTransactionsFlow(limit: Int): Flow<List<Transaction>> =
+        transactionDao.getRecentTransactionsFlow(limit).map { it.map { it.toDomain() } }
 
     override suspend fun getRecentTransactions(limit: Int): List<Transaction> =
         transactionDao.getRecentTransactions(limit).map { it.toDomain() }

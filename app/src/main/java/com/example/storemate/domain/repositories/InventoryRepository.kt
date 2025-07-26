@@ -14,6 +14,7 @@ interface InventoryRepository {
     suspend fun insertProduct(product: Product): Long
     suspend fun updateProduct(product: Product)
     suspend fun deleteProduct(product: Product)
+    fun getLowStockProductsFlow(): Flow<List<Product>>
     suspend fun getLowStockProducts(): List<Product>
     suspend fun searchProducts(query: String): List<Product>
     suspend fun filterProductsByCategory(category: String): List<Product>
@@ -29,7 +30,9 @@ interface InventoryRepository {
     suspend fun searchSuppliers(query: String): List<Supplier>
 
     // Transactions
+    fun getAllTransactionsFlow(): Flow<List<Transaction>>
     suspend fun getAllTransactions(): List<Transaction>
+    fun getRecentTransactionsFlow(limit: Int): Flow<List<Transaction>>
     suspend fun getRecentTransactions(limit: Int): List<Transaction>
     suspend fun getTransactionsByType(type: String): List<Transaction>
     suspend fun getTransactionsByProduct(productId: Int): List<Transaction>

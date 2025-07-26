@@ -2,6 +2,7 @@ package com.example.storemate.presentation.common
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
@@ -42,10 +43,11 @@ fun SearchBar(
 
 
 @Composable
-fun DropdownMenuCategory(
-    categories: List<String>,
-    selectedCategory: String?,
-    onCategorySelected: (String?) -> Unit,
+fun DropdownMenuList(
+    title: String,
+    itemList: List<String>,
+    selectedItem: String?,
+    onItemSelected: (String?) -> Unit,
     enabled: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -55,7 +57,7 @@ fun DropdownMenuCategory(
             onClick = { expanded = true },
             enabled = enabled
         ) {
-            Text(selectedCategory ?: "All Categories")
+            Text(selectedItem ?: title)
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }
 
@@ -64,18 +66,18 @@ fun DropdownMenuCategory(
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
-                text = { Text("All Categories") },
+                text = { Text(title) },
                 onClick = {
                     expanded = false
-                    onCategorySelected(null)
+                    onItemSelected(null)
                 }
             )
-            categories.forEach { category ->
+            itemList.forEach { category ->
                 DropdownMenuItem(
                     text = { Text(category) },
                     onClick = {
                         expanded = false
-                        onCategorySelected(category)
+                        onItemSelected(category)
                     }
                 )
             }
@@ -84,22 +86,24 @@ fun DropdownMenuCategory(
 }
 
 @Composable
-fun DropdownMenuSupplier(
-    suppliers: List<Pair<Int, String>>,
-    selectedSupplierId: Int?,
-    onSupplierSelected: (Int?) -> Unit,
+fun DropdownMenuMap(
+    title: String,
+    itemMap: List<Pair<Int, String>>,
+    selectedItemId: Int?,
+    onItemIdSelected: (Int?) -> Unit,
     enabled: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    val selectedSupplierName = suppliers.find { it.first == selectedSupplierId }?.second
+    val selectedItemName = itemMap.find { it.first == selectedItemId }?.second
 
     Box {
         OutlinedButton(
             onClick = { expanded = true },
-            enabled = enabled
+            enabled = enabled,
+            modifier = Modifier.wrapContentWidth()
         ) {
-            Text(selectedSupplierName ?: "All Suppliers")
+            Text(selectedItemName ?: title)
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }
 
@@ -108,18 +112,18 @@ fun DropdownMenuSupplier(
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
-                text = { Text("All Suppliers") },
+                text = { Text(title) },
                 onClick = {
                     expanded = false
-                    onSupplierSelected(null)
+                    onItemIdSelected(null)
                 }
             )
-            suppliers.forEach { (id, name) ->
+            itemMap.forEach { (id, name) ->
                 DropdownMenuItem(
                     text = { Text(name) },
                     onClick = {
                         expanded = false
-                        onSupplierSelected(id)
+                        onItemIdSelected(id)
                     }
                 )
             }

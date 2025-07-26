@@ -1,6 +1,11 @@
 package com.example.storemate.data.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.example.storemate.data.dbentities.ProductEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -24,6 +29,9 @@ interface ProductDao {
 
     @Query("SELECT * FROM ProductEntity WHERE id = :id")
     suspend fun getById(id: Int): ProductEntity?
+
+    @Query("SELECT * FROM ProductEntity WHERE currentStockLevel <= minimumStockLevel")
+    fun getLowStockFlow(): Flow<List<ProductEntity>>
 
     @Query("SELECT * FROM ProductEntity WHERE currentStockLevel <= minimumStockLevel")
     suspend fun getLowStock(): List<ProductEntity>

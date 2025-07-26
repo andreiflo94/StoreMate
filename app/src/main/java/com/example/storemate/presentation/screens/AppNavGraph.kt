@@ -16,15 +16,19 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.storemate.domain.model.AddProductEffect
 import com.example.storemate.domain.model.AddSupplierEffect
+import com.example.storemate.domain.model.AddTransactionEffect
 import com.example.storemate.domain.model.AppRoute
+import com.example.storemate.domain.model.DashboardEffect
 import com.example.storemate.domain.model.ProductListEffect
-import com.example.storemate.domain.model.QuickAccessType
 import com.example.storemate.domain.model.SupplierListEffect
+import com.example.storemate.domain.model.TransactionListEffect
 import com.example.storemate.presentation.viewmodels.AddProductViewModel
 import com.example.storemate.presentation.viewmodels.AddSupplierViewModel
+import com.example.storemate.presentation.viewmodels.AddTransactionViewModel
 import com.example.storemate.presentation.viewmodels.DashboardViewModel
 import com.example.storemate.presentation.viewmodels.ProductListViewModel
 import com.example.storemate.presentation.viewmodels.SupplierListViewModel
+import com.example.storemate.presentation.viewmodels.TransactionListViewModel
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -48,9 +52,21 @@ fun AppNavGraph(
                 LaunchedEffect(Unit) {
                     viewModel.effects.collectLatest { quickAccessType ->
                         when (quickAccessType) {
-                            QuickAccessType.PRODUCTS -> navController.navigate(AppRoute.Products.route)
-                            QuickAccessType.SUPPLIERS -> navController.navigate(AppRoute.Suppliers.route)
-                            QuickAccessType.STOCK_MANAGEMENT -> {}
+                            DashboardEffect.NavigateToProductsEffect -> navController.navigate(
+                                AppRoute.Products.route
+                            )
+
+                            DashboardEffect.NavigateToSuppliersEffect -> navController.navigate(
+                                AppRoute.Suppliers.route
+                            )
+
+                            DashboardEffect.NavigateToStockManagementEffect -> {
+                                navController.navigate(AppRoute.AddTransaction.route)
+                            }
+
+                            DashboardEffect.NavigateToTransactionsEffect -> navController.navigate(
+                                AppRoute.Transactions.route
+                            )
                         }
                     }
                 }
@@ -160,7 +176,46 @@ fun AppNavGraph(
                 }
             }
 
+            composable(route = AppRoute.AddTransaction.route) {
+                val viewModel: AddTransactionViewModel = koinViewModel()
+                AddTransactionRoute(viewModel)
+                LaunchedEffect(Unit) {
+                    viewModel.effects.collectLatest { effect ->
+                        when (effect) {
+                            is AddTransactionEffect.TransactionSaved -> {
+                                navController.popBackStack()
+                                snackbarHostState.showSnackbar("Stock update successfully")
+                            }
 
+                            is AddTransactionEffect.ShowErrorToUi -> snackbarHostState.showSnackbar(
+                                effect.message
+                            )
+                        }
+                    }
+                }
+            }
+
+            composable(route = AppRoute.Transactions.route) {
+                val viewModel: TransactionListViewModel = koinViewModel()
+                TransactionsRoute(viewModel = viewModel)
+                LaunchedEffect(Unit) {
+                    viewModel.effects.collectLatest { effect ->
+                        when (effect) {
+                            TransactionListEffect.NavigateToAddTransaction -> {
+                                navController.navigate(AppRoute.AddTransaction.route)
+                            }
+
+                            is TransactionListEffect.ShowErrorToUi -> {
+                                snackbarHostState.showSnackbar(effect.message)
+                            }
+
+                            is TransactionListEffect.ShowMessageToUi -> {
+                                snackbarHostState.showSnackbar(effect.message)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

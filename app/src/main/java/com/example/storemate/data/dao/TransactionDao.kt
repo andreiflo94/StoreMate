@@ -1,7 +1,11 @@
 package com.example.storemate.data.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.example.storemate.data.dbentities.TransactionEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
@@ -10,7 +14,13 @@ interface TransactionDao {
     suspend fun insert(transactionEntity: TransactionEntity): Long
 
     @Query("SELECT * FROM TransactionEntity ORDER BY date DESC")
+    fun getAllFlow(): Flow<List<TransactionEntity>>
+
+    @Query("SELECT * FROM TransactionEntity ORDER BY date DESC")
     suspend fun getAll(): List<TransactionEntity>
+
+    @Query("SELECT * FROM TransactionEntity ORDER BY date DESC LIMIT :limit")
+    fun getRecentTransactionsFlow(limit: Int): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM TransactionEntity ORDER BY date DESC LIMIT :limit")
     suspend fun getRecentTransactions(limit: Int): List<TransactionEntity>

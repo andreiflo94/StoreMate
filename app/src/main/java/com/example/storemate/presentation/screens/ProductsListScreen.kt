@@ -34,8 +34,8 @@ import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.ProductListIntent
 import com.example.storemate.domain.model.ProductListScreenState
 import com.example.storemate.presentation.UiState
-import com.example.storemate.presentation.common.DropdownMenuCategory
-import com.example.storemate.presentation.common.DropdownMenuSupplier
+import com.example.storemate.presentation.common.DropdownMenuList
+import com.example.storemate.presentation.common.DropdownMenuMap
 import com.example.storemate.presentation.common.SearchBar
 import com.example.storemate.presentation.viewmodels.ProductListViewModel
 
@@ -107,7 +107,6 @@ private fun ProductsListScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(16.dp)
     ) {
 
         // Search input
@@ -123,18 +122,20 @@ private fun ProductsListScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            DropdownMenuCategory(
-                categories = state.categories,
-                selectedCategory = state.selectedCategory,
-                onCategorySelected = { onIntent(ProductListIntent.CategorySelected(it)) }
+            DropdownMenuList(
+                title = "All categories",
+                itemList = state.categories,
+                selectedItem = state.selectedCategory,
+                onItemSelected = { onIntent(ProductListIntent.CategorySelected(it)) }
             )
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            DropdownMenuSupplier(
-                suppliers = state.suppliers,
-                selectedSupplierId = state.selectedSupplierId,
-                onSupplierSelected = { onIntent(ProductListIntent.SupplierSelected(it)) }
+            DropdownMenuMap(
+                title = "All suppliers",
+                itemMap = state.suppliers,
+                selectedItemId = state.selectedSupplierId,
+                onItemIdSelected = { onIntent(ProductListIntent.SupplierSelected(it)) }
             )
         }
 

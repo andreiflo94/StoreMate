@@ -7,6 +7,7 @@ import com.example.storemate.domain.model.ProductListIntent
 import com.example.storemate.domain.model.ProductListScreenState
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -38,6 +39,7 @@ class ProductListViewModel(
         observeSearchAndFilters()
     }
 
+    @OptIn(FlowPreview::class)
     private fun observeSearchAndFilters() {
         viewModelScope.launch {
             combine(

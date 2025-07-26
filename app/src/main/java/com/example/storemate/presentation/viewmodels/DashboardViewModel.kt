@@ -2,58 +2,74 @@ package com.example.storemate.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.storemate.domain.model.DashboardEffect
+import com.example.storemate.domain.model.DashboardIntent
+import com.example.storemate.domain.model.DashboardScreenState
+import com.example.storemate.domain.model.TransactionWithProductName
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
-import com.example.storemate.domain.model.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class DashboardViewModel(
     private val repository: InventoryRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<DashboardData>>(UiState.Loading)
-    val uiState: StateFlow<UiState<DashboardData>> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<DashboardScreenState>>(UiState.Loading)
+    val uiState: StateFlow<UiState<DashboardScreenState>> = _uiState.asStateFlow()
 
-    private val _effects = MutableSharedFlow<QuickAccessType>()
+    private val _effects = MutableSharedFlow<DashboardEffect>()
     val effects = _effects
 
     init {
-        loadDashboard()
+        observeDashboardData()
     }
 
-    private fun loadDashboard() {
+    private fun observeDashboardData() {
         viewModelScope.launch {
-            _uiState.value = UiState.Loading
-            try {
-                val lowStock = repository.getLowStockProducts()
-                val recentTransactionsWithProductName = ArrayList<TransactionWithProductName>()
-                repository.getRecentTransactions(10).map { transaction ->
-                    repository.getProductById(transaction.productId)?.name?.let{ transactionWithProductName ->
-                        recentTransactionsWithProductName.add(TransactionWithProductName(
-                            transaction = transaction,
-                            productName = transactionWithProductName
-                        ))
-                    }
-                }
-                _uiState.value = UiState.Success(
-                    DashboardData(
-                        lowStockItems = lowStock,
-                        recentTransactions = recentTransactionsWithProductName
+            combine(
+                repository.getLowStockProductsFlow(),
+                repository.getRecentTransactionsFlow(10)
+            ) { lowStockProducts, recentTransactions ->
+                Pair(lowStockProducts, recentTransactions)
+            }.collect { (lowStockProducts, recentTransactions) ->
+                try {
+                    val transactionsWithProductNames =
+                        recentTransactions.mapNotNull { transaction ->
+                            val product = repository.getProductById(transaction.productId)
+                            product?.let {
+                                TransactionWithProductName(
+                                    transaction = transaction,
+                                    productName = it.name
+                                )
+                            }
+                        }
+
+                    _uiState.value = UiState.Success(
+                        DashboardScreenState(
+                            lowStockItems = lowStockProducts,
+                            recentTransactions = transactionsWithProductNames
+                        )
                     )
-                )
-            } catch (e: Exception) {
-                _uiState.value = UiState.Error("Failed to load dashboard: ${e.message}")
+                } catch (e: Exception) {
+                    _uiState.value = UiState.Error("Failed to load dashboard: ${e.message}")
+                }
             }
         }
     }
 
-    fun onQuickAccessClicked(type: QuickAccessType) {
+    fun onIntent(dashboardIntent: DashboardIntent) {
         viewModelScope.launch {
-            _effects.emit(type)
+            when (dashboardIntent) {
+                DashboardIntent.NavigateToProducts -> _effects.emit(DashboardEffect.NavigateToProductsEffect)
+                DashboardIntent.NavigateToStockManagement -> _effects.emit(DashboardEffect.NavigateToStockManagementEffect)
+                DashboardIntent.NavigateToSuppliers -> _effects.emit(DashboardEffect.NavigateToSuppliersEffect)
+                DashboardIntent.NavigateToTransactions -> _effects.emit(DashboardEffect.NavigateToTransactionsEffect)
+            }
         }
     }
 }

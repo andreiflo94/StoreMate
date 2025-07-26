@@ -70,6 +70,9 @@ fun SuppliersListScreen(
             .padding(16.dp)
     ) {
         Text(text = "Suppliers", style = MaterialTheme.typography.headlineSmall)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         when (uiState) {
             is UiState.Loading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -101,7 +104,6 @@ private fun SuppliersListContent(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(16.dp)
     ) {
 
         SearchBar(

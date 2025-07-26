@@ -27,9 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.storemate.domain.model.DashboardData
+import com.example.storemate.domain.model.DashboardIntent
+import com.example.storemate.domain.model.DashboardScreenState
 import com.example.storemate.domain.model.Product
-import com.example.storemate.domain.model.QuickAccessType
 import com.example.storemate.domain.model.TransactionWithProductName
 import com.example.storemate.presentation.UiState
 import com.example.storemate.presentation.viewmodels.DashboardViewModel
@@ -42,14 +42,14 @@ fun DashboardRoute(
 
     DashboardScreen(
         uiState = state,
-        onQuickAccessClick = viewModel::onQuickAccessClicked
+        onIntent = viewModel::onIntent
     )
 }
 
 @Composable
 fun DashboardScreen(
-    uiState: UiState<DashboardData>,
-    onQuickAccessClick: (QuickAccessType) -> Unit
+    uiState: UiState<DashboardScreenState>,
+    onIntent: (DashboardIntent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -64,8 +64,8 @@ fun DashboardScreen(
             is UiState.Loading -> LoadingContent()
             is UiState.Error -> ErrorContent(uiState.message)
             is UiState.Success -> DashboardContent(
-                dashboardData = uiState.data,
-                onQuickAccessClick = onQuickAccessClick
+                dashboardScreenState = uiState.data,
+                onQuickAccessClick = onIntent
             )
         }
     }
@@ -73,8 +73,8 @@ fun DashboardScreen(
 
 @Composable
 fun DashboardContent(
-    dashboardData: DashboardData,
-    onQuickAccessClick: (QuickAccessType) -> Unit
+    dashboardScreenState: DashboardScreenState,
+    onQuickAccessClick: (DashboardIntent) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -82,19 +82,22 @@ fun DashboardContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            LowStockSection(dashboardData.lowStockItems)
+            LowStockSection(dashboardScreenState.lowStockItems)
         }
         item {
-            RecentTransactionsSection(dashboardData.recentTransactions)
+            RecentTransactionsSection(
+                onIntent = onQuickAccessClick,
+                dashboardScreenState.recentTransactions
+            )
         }
         item {
-            QuickAccessSection(onClick = onQuickAccessClick)
+            QuickAccessSection(onIntent = onQuickAccessClick)
         }
     }
 }
 
 @Composable
-fun QuickAccessSection(onClick: (QuickAccessType) -> Unit) {
+fun QuickAccessSection(onIntent: (DashboardIntent) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -110,18 +113,18 @@ fun QuickAccessSection(onClick: (QuickAccessType) -> Unit) {
                 QuickAccessButton(
                     "Products",
                     Icons.Default.DateRange
-                ) { onClick(QuickAccessType.PRODUCTS) }
+                ) { onIntent(DashboardIntent.NavigateToProducts) }
                 QuickAccessButton(
                     "Suppliers",
                     Icons.Default.Face
                 ) {
-                    onClick(
-                        QuickAccessType.SUPPLIERS
+                    onIntent(
+                        DashboardIntent.NavigateToSuppliers
                     )
                 }
                 QuickAccessButton("Stock management", Icons.Default.Create) {
-                    onClick(
-                        QuickAccessType.STOCK_MANAGEMENT
+                    onIntent(
+                        DashboardIntent.NavigateToStockManagement
                     )
                 }
             }
@@ -176,10 +179,16 @@ fun LowStockSection(products: List<Product>) {
 }
 
 @Composable
-fun RecentTransactionsSection(transactions: List<TransactionWithProductName>) {
+fun RecentTransactionsSection(
+    onIntent: (DashboardIntent) -> Unit,
+    transactions: List<TransactionWithProductName>
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = {
+            onIntent(DashboardIntent.NavigateToTransactions)
+        }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(

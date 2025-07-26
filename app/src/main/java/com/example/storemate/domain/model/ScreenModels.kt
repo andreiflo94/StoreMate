@@ -10,6 +10,8 @@ sealed class AppRoute(val route: String) {
     data object AddProduct: AppRoute("add_product")
     data object AddSupplier: AppRoute("add_supplier")
     data object Suppliers : AppRoute("suppliers")
+    data object Transactions : AppRoute("transactions")
+    data object AddTransaction : AppRoute("add_transaction")
 }
 
 //region dashboard
@@ -18,13 +20,23 @@ data class TransactionWithProductName(
     val productName: String
 )
 
-data class DashboardData(
+data class DashboardScreenState(
     val lowStockItems: List<Product>,
     val recentTransactions: List<TransactionWithProductName>
 )
 
-enum class QuickAccessType {
-    PRODUCTS, SUPPLIERS, STOCK_MANAGEMENT
+sealed interface DashboardIntent {
+    data object NavigateToProducts : DashboardIntent
+    data object NavigateToSuppliers : DashboardIntent
+    data object NavigateToStockManagement : DashboardIntent
+    data object NavigateToTransactions : DashboardIntent
+}
+
+sealed interface DashboardEffect {
+    data object NavigateToProductsEffect : DashboardEffect
+    data object NavigateToSuppliersEffect : DashboardEffect
+    data object NavigateToStockManagementEffect : DashboardEffect
+    data object NavigateToTransactionsEffect : DashboardEffect
 }
 //endregion
 
@@ -169,4 +181,58 @@ data class SupplierListScreenState(
     val suppliers: List<Supplier> = emptyList(),
     val searchQuery: String = ""
 )
+//endregion
+
+//region transactions
+sealed interface TransactionListIntent {
+    data class SearchChanged(val query: String) : TransactionListIntent
+    data class ProductFilterChanged(val productId: Int?) : TransactionListIntent
+    data class TypeFilterChanged(val type: String?) : TransactionListIntent
+    data object ClearFilters : TransactionListIntent
+    data object NavigateToAddTransaction : TransactionListIntent
+}
+
+sealed interface TransactionListEffect {
+    data object NavigateToAddTransaction : TransactionListEffect
+    data class ShowErrorToUi(val message: String) : TransactionListEffect
+    data class ShowMessageToUi(val message: String) : TransactionListEffect
+}
+
+data class TransactionListScreenState(
+    val transactions: List<Transaction> = emptyList(),
+    val productOptions: List<Pair<Int, String>> = emptyList(),
+    val typeOptions: List<String> = emptyList(),
+
+    val searchQuery: String = "",
+    val selectedProductId: Int? = null,
+    val selectedType: String? = null,
+)
+//endregion
+
+//stock management
+sealed interface AddTransactionIntent {
+    data class ProductSelected(val productId: Int) : AddTransactionIntent
+    data class TypeSelected(val type: String) : AddTransactionIntent
+    data class QuantityChanged(val quantity: String) : AddTransactionIntent
+    data class NotesChanged(val notes: String) : AddTransactionIntent
+    data object SubmitTransaction : AddTransactionIntent
+}
+
+sealed interface AddTransactionEffect {
+    data object TransactionSaved : AddTransactionEffect
+    data class ShowErrorToUi(val message: String) : AddTransactionEffect
+}
+
+data class AddTransactionScreenState(
+    val productId: Int? = null,
+    val type: String? = null, // "IN" or "OUT"
+    val quantity: String = "",
+    val notes: String = "",
+
+    val productOptions: List<Pair<Int, String>> = emptyList(),
+
+    val isSubmitting: Boolean = false,
+    val validationError: String? = null
+)
+
 //endregion

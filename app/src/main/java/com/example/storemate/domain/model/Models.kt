@@ -30,6 +30,10 @@ data class Transaction(
     val notes: String?
 )
 
+enum class TransactionType {
+    restock, sale
+}
+
 val sampleProducts = listOf(
     Product(
         id = 1,
