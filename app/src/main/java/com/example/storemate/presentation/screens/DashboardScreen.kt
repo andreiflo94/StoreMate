@@ -201,7 +201,7 @@ fun RecentTransactionsSection(
                 Text("No recent transactions.", style = MaterialTheme.typography.bodyMedium)
             } else {
                 transactions.forEach { tx ->
-                    Text("- ${tx.transaction.type.uppercase()} ${tx.transaction.quantity} × ${tx.productName}")
+                    Text("- ${tx.transaction.type.uppercase()} ${tx.transaction.quantity} × ${tx.productName} ${tx.transaction.notes}")
                 }
             }
         }

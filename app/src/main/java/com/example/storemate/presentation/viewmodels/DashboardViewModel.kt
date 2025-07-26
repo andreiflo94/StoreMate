@@ -5,13 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.storemate.domain.model.DashboardEffect
 import com.example.storemate.domain.model.DashboardIntent
 import com.example.storemate.domain.model.DashboardScreenState
-import com.example.storemate.domain.model.TransactionWithProductName
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -33,31 +33,16 @@ class DashboardViewModel(
         viewModelScope.launch {
             combine(
                 repository.getLowStockProductsFlow(),
-                repository.getRecentTransactionsFlow(10)
+                repository.getRecentTransactionsWithProductNameFlow(limit = 10)
             ) { lowStockProducts, recentTransactions ->
-                Pair(lowStockProducts, recentTransactions)
-            }.collect { (lowStockProducts, recentTransactions) ->
-                try {
-                    val transactionsWithProductNames =
-                        recentTransactions.mapNotNull { transaction ->
-                            val product = repository.getProductById(transaction.productId)
-                            product?.let {
-                                TransactionWithProductName(
-                                    transaction = transaction,
-                                    productName = it.name
-                                )
-                            }
-                        }
-
-                    _uiState.value = UiState.Success(
-                        DashboardScreenState(
-                            lowStockItems = lowStockProducts,
-                            recentTransactions = transactionsWithProductNames
-                        )
-                    )
-                } catch (e: Exception) {
-                    _uiState.value = UiState.Error("Failed to load dashboard: ${e.message}")
-                }
+                DashboardScreenState(
+                    lowStockItems = lowStockProducts,
+                    recentTransactions = recentTransactions
+                )
+            }.catch { e ->
+                _uiState.value = UiState.Error("Failed to load dashboard: ${e.message}")
+            }.collect { dashboardState ->
+                _uiState.value = UiState.Success(dashboardState)
             }
         }
     }

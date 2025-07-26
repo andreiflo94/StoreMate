@@ -82,7 +82,6 @@ class AddProductViewModel(
             is AddProductIntent.MinimumStockLevelChanged -> updateState(minimumStockLevel = intent.level)
             is AddProductIntent.NavigateToNewSupplier -> navigateToAddSupplier()
             AddProductIntent.SaveProduct -> saveProduct()
-            AddProductIntent.Cancel -> navigateBack()
         }
     }
 
@@ -159,7 +158,7 @@ class AddProductViewModel(
                 }
                 // Set loading state
                 updateState(isSaving = false)
-                navigateBack()
+                productSaved()
             } catch (e: Exception) {
                 updateState(isSaving = false)
                 sendError("Failed to save product: ${e.localizedMessage}")
@@ -173,9 +172,9 @@ class AddProductViewModel(
         }
     }
 
-    private fun navigateBack() {
+    private fun productSaved() {
         viewModelScope.launch {
-            _effects.emit(AddProductEffect.NavigateBack)
+            _effects.emit(AddProductEffect.ProductSaved)
         }
     }
 

@@ -114,11 +114,10 @@ sealed interface AddProductIntent {
     data class MinimumStockLevelChanged(val level: String) : AddProductIntent
     data object NavigateToNewSupplier: AddProductIntent
     data object SaveProduct : AddProductIntent
-    data object Cancel : AddProductIntent
 }
 
 sealed interface AddProductEffect {
-    data object NavigateBack : AddProductEffect
+    data object ProductSaved : AddProductEffect
     data object NavigateToAddSupplier: AddProductEffect
     data class ShowError(val message: String) : AddProductEffect
 }
@@ -132,11 +131,10 @@ sealed class AddSupplierIntent {
     data class EmailChanged(val email: String) : AddSupplierIntent()
     data class AddressChanged(val address: String) : AddSupplierIntent()
     data object SaveSupplier : AddSupplierIntent()
-    data object Cancel : AddSupplierIntent()
 }
 
 sealed class AddSupplierEffect {
-    data object NavigateBack : AddSupplierEffect()
+    data object SupplierSaved : AddSupplierEffect()
     data class ShowError(val message: String) : AddSupplierEffect()
 }
 
@@ -186,8 +184,8 @@ data class SupplierListScreenState(
 //region transactions
 sealed interface TransactionListIntent {
     data class SearchChanged(val query: String) : TransactionListIntent
-    data class ProductFilterChanged(val productId: Int?) : TransactionListIntent
     data class TypeFilterChanged(val type: String?) : TransactionListIntent
+    data class SortOrderChanged(val ascending: Boolean) : TransactionListIntent
     data object ClearFilters : TransactionListIntent
     data object NavigateToAddTransaction : TransactionListIntent
 }
@@ -199,13 +197,12 @@ sealed interface TransactionListEffect {
 }
 
 data class TransactionListScreenState(
-    val transactions: List<Transaction> = emptyList(),
-    val productOptions: List<Pair<Int, String>> = emptyList(),
+    val transactions: List<TransactionWithProductName> = emptyList(),
     val typeOptions: List<String> = emptyList(),
 
     val searchQuery: String = "",
-    val selectedProductId: Int? = null,
     val selectedType: String? = null,
+    val sortAscending: Boolean = false,
 )
 //endregion
 

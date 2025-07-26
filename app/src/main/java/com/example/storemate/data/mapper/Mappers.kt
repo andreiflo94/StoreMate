@@ -3,9 +3,11 @@ package com.example.storemate.data.mapper
 import com.example.storemate.data.dbentities.ProductEntity
 import com.example.storemate.data.dbentities.SupplierEntity
 import com.example.storemate.data.dbentities.TransactionEntity
+import com.example.storemate.data.dbentities.TransactionWithProductNameEntity
 import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.model.Transaction
+import com.example.storemate.domain.model.TransactionWithProductName
 
 //region Data Entity to Domain
 fun ProductEntity.toDomain() = Product(
@@ -36,6 +38,11 @@ fun TransactionEntity.toDomain() = Transaction(
     productId = productId,
     quantity = quantity,
     notes = notes
+)
+
+fun TransactionWithProductNameEntity.toDomain() = TransactionWithProductName(
+    transaction = transactionEntity.toDomain(),
+    productName = productName
 )
 //endregion
 
@@ -69,5 +76,10 @@ fun Transaction.toEntity() = TransactionEntity(
     productId = productId,
     quantity = quantity,
     notes = notes
+)
+
+fun TransactionWithProductName.toEntity() = TransactionWithProductNameEntity(
+    transactionEntity = transaction.toEntity(),
+    productName = productName
 )
 //endregion

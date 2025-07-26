@@ -6,6 +6,7 @@ import com.example.storemate.data.mapper.toEntity
 import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.model.Transaction
+import com.example.storemate.domain.model.TransactionWithProductName
 import com.example.storemate.domain.repositories.InventoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -105,6 +106,14 @@ class InventoryRepositoryImpl(db: StoreMateDb) : InventoryRepository {
 
     override suspend fun insertTransaction(transaction: Transaction) =
         transactionDao.insert(transaction.toEntity())
+
+    override fun getTransactionsWithProductNameFlow(): Flow<List<TransactionWithProductName>> =
+        transactionDao.getTransactionsWithProductNameFlow()
+            .map { it.map { transactionWithProductNameEntity -> transactionWithProductNameEntity.toDomain() } }
+
+    override fun getRecentTransactionsWithProductNameFlow(limit: Int): Flow<List<TransactionWithProductName>> =
+        transactionDao.getRecentTransactionsWithProductNameFlow(limit)
+            .map { it.map { transactionWithProductNameEntity -> transactionWithProductNameEntity.toDomain() } }
     //endregion
 }
 

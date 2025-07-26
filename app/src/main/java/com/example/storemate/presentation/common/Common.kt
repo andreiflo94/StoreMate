@@ -1,11 +1,19 @@
 package com.example.storemate.presentation.common
 
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -18,7 +26,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun SearchBar(
@@ -130,3 +141,49 @@ fun DropdownMenuMap(
         }
     }
 }
+
+@Composable
+fun SortByDateCheckbox(
+    currentValue: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = currentValue,
+            onCheckedChange = onCheckedChange
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "Oldest first",
+            modifier = Modifier.wrapContentWidth()
+        )
+    }
+}
+
+
+@Composable
+fun CustomSnackBar(
+    message: String,
+    isRtl: Boolean = false,
+    isError: Boolean = false,
+    containerColor: Color = if (isError) Color.Red else Color.Green,
+    textColor: Color = if (isError) Color.White else Color.Black
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(containerColor)
+            .padding(16.dp),
+        horizontalArrangement = if (isRtl) Arrangement.End else Arrangement.Start
+    ) {
+        Text(
+            text = message,
+            color = textColor
+        )
+    }
+}
+

@@ -54,7 +54,6 @@ class AddSupplierViewModel(
             is AddSupplierIntent.EmailChanged -> updateState { it.copy(email = intent.email) }
             is AddSupplierIntent.AddressChanged -> updateState { it.copy(address = intent.address) }
             AddSupplierIntent.SaveSupplier -> saveSupplier()
-            AddSupplierIntent.Cancel -> navigateBack()
         }
     }
 
@@ -95,7 +94,7 @@ class AddSupplierViewModel(
                     repository.insertSupplier(supplier)
                 }
                 updateState { it.copy(isSaving = false) }
-                navigateBack()
+                supplierSaved()
             } catch (e: Exception) {
                 updateState { it.copy(isSaving = false) }
                 showError("Failed to save supplier: ${e.message}")
@@ -103,9 +102,9 @@ class AddSupplierViewModel(
         }
     }
 
-    private fun navigateBack() {
+    private fun supplierSaved() {
         viewModelScope.launch {
-            _effects.emit(AddSupplierEffect.NavigateBack)
+            _effects.emit(AddSupplierEffect.SupplierSaved)
         }
     }
 

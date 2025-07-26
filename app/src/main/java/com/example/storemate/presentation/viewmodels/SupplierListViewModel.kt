@@ -94,7 +94,11 @@ class SupplierListViewModel(
                         repository.deleteSupplier(action.supplier)
                         _effects.emit(SupplierListEffect.ShowMessageToUi("Supplier deleted"))
                     } catch (e: Exception) {
-                        _effects.emit(SupplierListEffect.ShowErrorToUi("Failed to delete supplier: ${e.message}"))
+                        if (e.message?.contains("constraint") == true) {
+                            _effects.emit(SupplierListEffect.ShowErrorToUi("Failed to delete supplier, first delete suppliers products"))
+                        } else {
+                            _effects.emit(SupplierListEffect.ShowErrorToUi("Failed to delete supplier: ${e.message}"))
+                        }
                     }
                 }
             }

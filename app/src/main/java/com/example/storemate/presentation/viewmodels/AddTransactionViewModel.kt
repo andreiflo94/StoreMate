@@ -22,7 +22,7 @@ class AddTransactionViewModel(
     private val repository: InventoryRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<AddTransactionScreenState>(AddTransactionScreenState())
+    private val _uiState = MutableStateFlow(AddTransactionScreenState())
     val uiState: StateFlow<AddTransactionScreenState> = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<AddTransactionEffect>()
@@ -117,7 +117,7 @@ class AddTransactionViewModel(
         product: Product
     ): Boolean {
         return if (type == TransactionType.sale.toString() && product.currentStockLevel < quantity) {
-            _effects.emit(AddTransactionEffect.ShowErrorToUi("Insufficient stock"))
+            _effects.emit(AddTransactionEffect.ShowErrorToUi("Fail: Insufficient stock"))
             _uiState.update { it.copy(isSubmitting = false) }
             false
         } else true

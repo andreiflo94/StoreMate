@@ -251,6 +251,44 @@ class StoreMateDbTest {
 
     //region transactions
     @Test
+    fun `getTransactionsWithProductNameFlow emits transactions with product names`() = runTest {
+        insertProduct()
+
+        val transaction1 = createTransaction(type = "sale", quantity = 2)
+        val transaction2 = createTransaction(type = "restock", quantity = 5)
+
+        repository.insertTransaction(transaction1)
+        repository.insertTransaction(transaction2)
+
+        repository.getTransactionsWithProductNameFlow().test {
+            val result = awaitItem()
+            assertEquals(2, result.size)
+            assertTrue(result.all { it.productName == defaultProduct.name })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `getRecentTransactionsWithProductNameFlow emits limited recent transactions with product names`() =
+        runTest {
+            insertProduct()
+
+            val transactions = listOf(
+                createTransaction(type = "restock", quantity = 5),
+                createTransaction(type = "sale", quantity = 2),
+                createTransaction(type = "restock", quantity = 10)
+            )
+            transactions.forEach { repository.insertTransaction(it) }
+
+            repository.getRecentTransactionsWithProductNameFlow(limit = 2).test {
+                val result = awaitItem()
+                assertEquals(2, result.size)
+                assertTrue(result.all { it.productName == defaultProduct.name })
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
     fun `getAllTransactionsFlow emits inserted transactions`() = runTest {
         insertProduct()
 

@@ -1,6 +1,11 @@
 package com.example.storemate.data.dbentities
 
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity
 data class SupplierEntity(
@@ -53,4 +58,11 @@ data class TransactionEntity(
     val productId: Int,
     val quantity: Int,
     val notes: String?
+)
+
+data class TransactionWithProductNameEntity(
+    @Embedded val transactionEntity: TransactionEntity,
+
+    @ColumnInfo(name = "productName")
+    val productName: String
 )

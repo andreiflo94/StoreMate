@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.storemate.data.dbentities.TransactionEntity
+import com.example.storemate.data.dbentities.TransactionWithProductNameEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -48,4 +49,24 @@ interface TransactionDao {
     """
     )
     suspend fun filterByTypeAndProduct(type: String, productId: Int): List<TransactionEntity>
+
+    @Query(
+        """
+        SELECT t.*, p.name AS productName
+        FROM TransactionEntity t
+        LEFT JOIN ProductEntity p ON t.productId = p.id
+        ORDER BY t.date DESC
+    """
+    )
+    fun getTransactionsWithProductNameFlow(): Flow<List<TransactionWithProductNameEntity>>
+
+    @Query(
+        """
+        SELECT t.*, p.name AS productName
+        FROM TransactionEntity t
+        LEFT JOIN ProductEntity p ON t.productId = p.id
+        ORDER BY date DESC LIMIT :limit
+    """
+    )
+    fun getRecentTransactionsWithProductNameFlow(limit: Int): Flow<List<TransactionWithProductNameEntity>>
 }

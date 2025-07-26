@@ -3,6 +3,7 @@ package com.example.storemate.domain.repositories
 import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.model.Transaction
+import com.example.storemate.domain.model.TransactionWithProductName
 import kotlinx.coroutines.flow.Flow
 
 interface InventoryRepository {
@@ -39,4 +40,6 @@ interface InventoryRepository {
     suspend fun filterTransactionsByDateRange(from: Long, to: Long): List<Transaction>
     suspend fun filterTransactionsByTypeAndProduct(type: String, productId: Int): List<Transaction>
     suspend fun insertTransaction(transaction: Transaction): Long
+    fun getTransactionsWithProductNameFlow(): Flow<List<TransactionWithProductName>>
+    fun getRecentTransactionsWithProductNameFlow(limit: Int): Flow<List<TransactionWithProductName>>
 }
