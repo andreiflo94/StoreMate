@@ -19,10 +19,12 @@ import com.example.storemate.domain.model.AddSupplierEffect
 import com.example.storemate.domain.model.AppRoute
 import com.example.storemate.domain.model.ProductListEffect
 import com.example.storemate.domain.model.QuickAccessType
+import com.example.storemate.domain.model.SupplierListEffect
 import com.example.storemate.presentation.viewmodels.AddProductViewModel
 import com.example.storemate.presentation.viewmodels.AddSupplierViewModel
 import com.example.storemate.presentation.viewmodels.DashboardViewModel
 import com.example.storemate.presentation.viewmodels.ProductListViewModel
+import com.example.storemate.presentation.viewmodels.SupplierListViewModel
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -47,15 +49,26 @@ fun AppNavGraph(
                     viewModel.effects.collectLatest { quickAccessType ->
                         when (quickAccessType) {
                             QuickAccessType.PRODUCTS -> navController.navigate(AppRoute.Products.route)
-                            QuickAccessType.SUPPLIERS -> navController.navigate(AppRoute.AddSupplier.route)
+                            QuickAccessType.SUPPLIERS -> navController.navigate(AppRoute.Suppliers.route)
                             QuickAccessType.STOCK_MANAGEMENT -> {}
                         }
                     }
                 }
             }
 
-            composable(AppRoute.AddSupplier.route) {
+            composable(
+                route = AppRoute.AddSupplier.route + "?supplierId={supplierId}", arguments = listOf(
+                    navArgument(name = "supplierId") {
+                        type = NavType.IntType
+                        defaultValue = -1
+                    })
+            ) { backStackEntry ->
                 val viewModel: AddSupplierViewModel = koinViewModel()
+                backStackEntry.arguments?.getInt("supplierId")?.let { id ->
+                    if (id != -1) {
+                        viewModel.loadSupplier(id)
+                    }
+                }
                 AddSupplierRoute(viewModel = viewModel)
                 LaunchedEffect(Unit) {
                     viewModel.effects.collectLatest { effect ->
@@ -120,6 +133,34 @@ fun AppNavGraph(
                     }
                 }
             }
+
+            composable(AppRoute.Suppliers.route) {
+                val viewModel: SupplierListViewModel = koinViewModel()
+                SuppliersListRoute(viewModel = viewModel)
+                LaunchedEffect(Unit) {
+                    viewModel.effects.collectLatest { effect ->
+                        when (effect) {
+                            is SupplierListEffect.NavigateToSupplierDetail -> {
+                                navController.navigate(AppRoute.AddSupplier.route + "?supplierId=${effect.supplierId}")
+                            }
+
+                            is SupplierListEffect.NavigateToAddSupplier -> {
+                                navController.navigate(AppRoute.AddSupplier.route)
+                            }
+
+                            is SupplierListEffect.ShowErrorToUi -> {
+                                snackbarHostState.showSnackbar(effect.message)
+                            }
+
+                            is SupplierListEffect.ShowMessageToUi -> {
+                                snackbarHostState.showSnackbar(effect.message)
+                            }
+                        }
+                    }
+                }
+            }
+
+
         }
     }
 

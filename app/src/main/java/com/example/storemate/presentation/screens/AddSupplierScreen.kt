@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -43,11 +44,13 @@ fun AddSupplierRoute(
                 CircularProgressIndicator()
             }
         }
+
         is UiState.Error -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(text = (uiState as UiState.Error).message)
             }
         }
+
         is UiState.Success -> {
             AddSupplierScreen(
                 state = (uiState as UiState.Success<AddSupplierScreenState>).data,
@@ -68,7 +71,7 @@ fun AddSupplierScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.Top,
     ) {
-        Text(text = "Add Supplier", style = MaterialTheme.typography.headlineSmall)
+        Text(text = state.screenTitle, style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -77,7 +80,8 @@ fun AddSupplierScreen(
             onValueChange = { onIntent(AddSupplierIntent.NameChanged(it)) },
             label = { Text("Name") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -87,7 +91,8 @@ fun AddSupplierScreen(
             onValueChange = { onIntent(AddSupplierIntent.ContactPersonChanged(it)) },
             label = { Text("Contact Person") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -97,7 +102,10 @@ fun AddSupplierScreen(
             onValueChange = { onIntent(AddSupplierIntent.PhoneChanged(it)) },
             label = { Text("Phone") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Next
+            ),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -108,7 +116,10 @@ fun AddSupplierScreen(
             onValueChange = { onIntent(AddSupplierIntent.EmailChanged(it)) },
             label = { Text("Email") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            ),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -119,7 +130,8 @@ fun AddSupplierScreen(
             onValueChange = { onIntent(AddSupplierIntent.AddressChanged(it)) },
             label = { Text("Address") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
         )
 
         Spacer(modifier = Modifier.height(16.dp))

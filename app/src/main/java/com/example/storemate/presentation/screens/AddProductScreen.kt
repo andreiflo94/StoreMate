@@ -81,7 +81,7 @@ fun AddProductScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.Top,
     ) {
-        Text(text = "Add Product", style = MaterialTheme.typography.headlineSmall)
+        Text(text = state.screenTitle, style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
 

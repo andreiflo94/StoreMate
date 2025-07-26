@@ -8,6 +8,7 @@ import com.example.storemate.presentation.viewmodels.AddProductViewModel
 import com.example.storemate.presentation.viewmodels.AddSupplierViewModel
 import com.example.storemate.presentation.viewmodels.DashboardViewModel
 import com.example.storemate.presentation.viewmodels.ProductListViewModel
+import com.example.storemate.presentation.viewmodels.SupplierListViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -31,5 +32,6 @@ val appModule = module {
     viewModel { DashboardViewModel(get()) }
     viewModel { ProductListViewModel(get()) }
     viewModel { AddProductViewModel(get()) }
-    viewModel { AddSupplierViewModel(get())}
+    viewModel { AddSupplierViewModel(get()) }
+    viewModel { SupplierListViewModel(get()) }
 }

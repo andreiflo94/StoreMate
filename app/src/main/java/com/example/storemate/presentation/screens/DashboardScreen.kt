@@ -51,13 +51,23 @@ fun DashboardScreen(
     uiState: UiState<DashboardData>,
     onQuickAccessClick: (QuickAccessType) -> Unit
 ) {
-    when (uiState) {
-        is UiState.Loading -> LoadingContent()
-        is UiState.Error -> ErrorContent(uiState.message)
-        is UiState.Success -> DashboardContent(
-            dashboardData = uiState.data,
-            onQuickAccessClick = onQuickAccessClick
-        )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(text = "Dashboard", style = MaterialTheme.typography.headlineSmall)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        when (uiState) {
+            is UiState.Loading -> LoadingContent()
+            is UiState.Error -> ErrorContent(uiState.message)
+            is UiState.Success -> DashboardContent(
+                dashboardData = uiState.data,
+                onQuickAccessClick = onQuickAccessClick
+            )
+        }
     }
 }
 
@@ -68,8 +78,7 @@ fun DashboardContent(
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {

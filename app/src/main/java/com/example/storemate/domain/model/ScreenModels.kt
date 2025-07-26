@@ -9,6 +9,7 @@ sealed class AppRoute(val route: String) {
     data object Products : AppRoute("products")
     data object AddProduct: AppRoute("add_product")
     data object AddSupplier: AppRoute("add_supplier")
+    data object Suppliers : AppRoute("suppliers")
 }
 
 //region dashboard
@@ -58,6 +59,7 @@ data class ProductListScreenState(
 
 //region addproduct
 data class AddProductScreenState(
+    val screenTitle: String = "Add product",
     val name: String = "",
     val description: String = "",
     val price: String = "",
@@ -127,6 +129,7 @@ sealed class AddSupplierEffect {
 }
 
 data class AddSupplierScreenState(
+    val screenTitle: String = "Add supplier",
     val name: String = "",
     val contactPerson: String = "",
     val phone: String = "",
@@ -143,4 +146,27 @@ data class AddSupplierScreenState(
     }
 
 }
+//endregion
+
+//region supplierlist
+
+sealed interface SupplierListIntent {
+    data class SearchChanged(val query: String) : SupplierListIntent
+    data class SupplierClicked(val supplierId: Int) : SupplierListIntent
+    data class DeleteSupplier(val supplier: Supplier) : SupplierListIntent
+    data object NavigateToAddSupplier : SupplierListIntent
+    data object ClearSearch : SupplierListIntent
+}
+
+sealed interface SupplierListEffect {
+    data object NavigateToAddSupplier : SupplierListEffect
+    data class NavigateToSupplierDetail(val supplierId: Int) : SupplierListEffect
+    data class ShowErrorToUi(val message: String) : SupplierListEffect
+    data class ShowMessageToUi(val message: String) : SupplierListEffect
+}
+
+data class SupplierListScreenState(
+    val suppliers: List<Supplier> = emptyList(),
+    val searchQuery: String = ""
+)
 //endregion

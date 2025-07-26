@@ -18,11 +18,33 @@ class AddSupplierViewModel(
     private val repository: InventoryRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<AddSupplierScreenState>>(UiState.Success(AddSupplierScreenState()))
+    private val _uiState =
+        MutableStateFlow<UiState<AddSupplierScreenState>>(UiState.Success(AddSupplierScreenState()))
     val uiState = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<AddSupplierEffect>()
     val effects = _effects.asSharedFlow()
+
+    private var supplierIdToEdit: Int? = null
+
+    fun loadSupplier(supplierId: Int) {
+        viewModelScope.launch {
+            repository.getSupplierById(supplierId)?.let { supplier ->
+                updateState { currentState ->
+                    currentState.copy(
+                        screenTitle = "Edit supplier",
+                        name = supplier.name,
+                        contactPerson = supplier.contactPerson,
+                        phone = supplier.phone,
+                        email = supplier.email,
+                        address = supplier.address,
+                        isSaving = false
+                    )
+                }
+                supplierIdToEdit = supplierId
+            }
+        }
+    }
 
     fun onIntent(intent: AddSupplierIntent) {
         when (intent) {
@@ -60,15 +82,20 @@ class AddSupplierViewModel(
         viewModelScope.launch {
             try {
                 val supplier = Supplier(
+                    id = supplierIdToEdit ?: 0,
                     name = currentState.name,
                     contactPerson = currentState.contactPerson,
                     phone = currentState.phone,
                     email = currentState.email,
                     address = currentState.address
                 )
-                repository.insertSupplier(supplier)
+                supplierIdToEdit?.let {
+                    repository.updateSupplier(supplier)
+                } ?: run {
+                    repository.insertSupplier(supplier)
+                }
                 updateState { it.copy(isSaving = false) }
-                _effects.emit(AddSupplierEffect.NavigateBack)
+                navigateBack()
             } catch (e: Exception) {
                 updateState { it.copy(isSaving = false) }
                 showError("Failed to save supplier: ${e.message}")

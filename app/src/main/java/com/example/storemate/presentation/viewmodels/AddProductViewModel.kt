@@ -5,11 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.example.storemate.domain.model.AddProductEffect
 import com.example.storemate.domain.model.AddProductIntent
 import com.example.storemate.domain.model.AddProductScreenState
-import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.model.Product
+import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class AddProductViewModel(
@@ -34,6 +39,7 @@ class AddProductViewModel(
             repository.getProductById(productId)?.let { product ->
                 repository.getSupplierById(product.supplierId)?.let {
                     updateState(
+                        title = "Edit product",
                         name = product.name,
                         description = product.description,
                         price = product.price.toString(),
@@ -81,6 +87,7 @@ class AddProductViewModel(
     }
 
     private fun updateState(
+        title: String = currentState.screenTitle,
         name: String = currentState.name,
         description: String = currentState.description,
         price: String = currentState.price,
@@ -93,6 +100,7 @@ class AddProductViewModel(
         suppliers: List<Supplier> = currentState.suppliers
     ) {
         currentState = AddProductScreenState(
+            title,
             name,
             description,
             price,
@@ -149,10 +157,12 @@ class AddProductViewModel(
                 } ?: run {
                     repository.insertProduct(product)
                 }
+                // Set loading state
+                updateState(isSaving = false)
                 navigateBack()
             } catch (e: Exception) {
-                sendError("Failed to save product: ${e.localizedMessage}")
                 updateState(isSaving = false)
+                sendError("Failed to save product: ${e.localizedMessage}")
             }
         }
     }

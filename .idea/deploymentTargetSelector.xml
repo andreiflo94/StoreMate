@@ -8,16 +8,16 @@
       <SelectionState runConfigName="ProductsScreenTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="clearFilters_resetsAllFilters()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="productsScreen_displaysErrorMessage_whenUiStateIsError()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="screen_displays_products_when_loaded()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="productsScreen_filters_products_by_search_and_category()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="SuppliersScreenTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="Tests in 'com.example.storemate.presentation'">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

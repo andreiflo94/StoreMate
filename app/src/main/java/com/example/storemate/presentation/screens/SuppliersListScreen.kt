@@ -30,52 +30,46 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.storemate.domain.model.Product
-import com.example.storemate.domain.model.ProductListIntent
-import com.example.storemate.domain.model.ProductListScreenState
+import com.example.storemate.domain.model.Supplier
+import com.example.storemate.domain.model.SupplierListIntent
+import com.example.storemate.domain.model.SupplierListScreenState
 import com.example.storemate.presentation.UiState
-import com.example.storemate.presentation.common.DropdownMenuCategory
-import com.example.storemate.presentation.common.DropdownMenuSupplier
 import com.example.storemate.presentation.common.SearchBar
-import com.example.storemate.presentation.viewmodels.ProductListViewModel
+import com.example.storemate.presentation.viewmodels.SupplierListViewModel
 
 @Composable
-fun ProductsRoute(
-    viewModel: ProductListViewModel
+fun SuppliersListRoute(
+    viewModel: SupplierListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box {
-        ProductsScreen(
+        SuppliersListScreen(
             uiState = uiState,
-            onIntent = { productListIntent ->
-                viewModel.onIntent(productListIntent)
-            }
+            onIntent = { intent -> viewModel.onIntent(intent) }
         )
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            onClick = { viewModel.onIntent(ProductListIntent.NavigateToAddProduct) },
+            onClick = { viewModel.onIntent(SupplierListIntent.NavigateToAddSupplier) },
         ) {
-            Icon(Icons.Filled.Add, "Floating action button.")
+            Icon(Icons.Filled.Add, "Add Supplier")
         }
     }
 }
 
 @Composable
-fun ProductsScreen(
-    uiState: UiState<ProductListScreenState>,
-    onIntent: (ProductListIntent) -> Unit
+fun SuppliersListScreen(
+    uiState: UiState<SupplierListScreenState>,
+    onIntent: (SupplierListIntent) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(text = "Products", style = MaterialTheme.typography.headlineSmall)
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Suppliers", style = MaterialTheme.typography.headlineSmall)
         when (uiState) {
             is UiState.Loading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -90,19 +84,19 @@ fun ProductsScreen(
             }
 
             is UiState.Success -> {
-                ProductsListScreen(uiState, onIntent)
+                SuppliersListContent(uiState, onIntent)
             }
         }
     }
 }
 
 @Composable
-private fun ProductsListScreen(
-    uiState: UiState.Success<ProductListScreenState>,
-    onIntent: (ProductListIntent) -> Unit
+private fun SuppliersListContent(
+    uiState: UiState.Success<SupplierListScreenState>,
+    onIntent: (SupplierListIntent) -> Unit
 ) {
     val state = uiState.data
-    val noProducts = state.products.isEmpty()
+    val noSuppliers = state.suppliers.isEmpty()
 
     Column(
         Modifier
@@ -110,51 +104,25 @@ private fun ProductsListScreen(
             .padding(16.dp)
     ) {
 
-        // Search input
         SearchBar(
             searchQuery = state.searchQuery,
-            onSearchChanged = { onIntent(ProductListIntent.SearchChanged(it)) }
+            onSearchChanged = { onIntent(SupplierListIntent.SearchChanged(it)) }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Filters
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            DropdownMenuCategory(
-                categories = state.categories,
-                selectedCategory = state.selectedCategory,
-                onCategorySelected = { onIntent(ProductListIntent.CategorySelected(it)) }
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            DropdownMenuSupplier(
-                suppliers = state.suppliers,
-                selectedSupplierId = state.selectedSupplierId,
-                onSupplierSelected = { onIntent(ProductListIntent.SupplierSelected(it)) }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Clear filters
-        if (state.selectedCategory != null || state.selectedSupplierId != null) {
+        if (state.searchQuery.isNotBlank()) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = { onIntent(ProductListIntent.ClearFilters) }) {
-                    Icon(Icons.Default.Clear, contentDescription = null)
+                TextButton(onClick = { onIntent(SupplierListIntent.ClearSearch) }) {
+                    Icon(Icons.Filled.Clear, contentDescription = null)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Clear filters")
+                    Text("Clear search")
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // List or empty state
-        if (noProducts) {
+        if (noSuppliers) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -163,13 +131,13 @@ private fun ProductsListScreen(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "No products found.",
+                        text = "No suppliers found.",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Try adding some products first.",
+                        text = "Try adding some suppliers first.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -177,15 +145,11 @@ private fun ProductsListScreen(
             }
         } else {
             LazyColumn {
-                items(state.products) { product ->
-                    ProductItem(
-                        product = product,
-                        onIntent = {
-                            onIntent.invoke(it)
-                        },
-                        onDeleteClicked = {
-                            onIntent(ProductListIntent.DeleteProduct(product))
-                        }
+                items(state.suppliers) { supplier ->
+                    SupplierItem(
+                        supplier = supplier,
+                        onIntent = onIntent,
+                        onDeleteClicked = { onIntent(SupplierListIntent.DeleteSupplier(supplier)) }
                     )
                 }
             }
@@ -193,32 +157,39 @@ private fun ProductsListScreen(
     }
 }
 
-
 @Composable
-fun ProductItem(
-    product: Product,
-    onIntent: (ProductListIntent) -> Unit,
+fun SupplierItem(
+    supplier: Supplier,
+    onIntent: (SupplierListIntent) -> Unit,
     onDeleteClicked: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onIntent(ProductListIntent.ProductClicked(product.id)) }
+            .clickable { onIntent(SupplierListIntent.SupplierClicked(supplier.id)) }
             .padding(vertical = 12.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = product.name, style = MaterialTheme.typography.titleMedium)
+            Text(text = supplier.name, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Stock: ${product.currentStockLevel}",
+                text = "Contact: ${supplier.contactPerson}",
                 style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Phone: ${supplier.phone}",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "Email: ${supplier.email}",
+                style = MaterialTheme.typography.bodySmall
             )
         }
         IconButton(onClick = onDeleteClicked) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete Product",
+                contentDescription = "Delete Supplier",
                 tint = MaterialTheme.colorScheme.error
             )
         }
