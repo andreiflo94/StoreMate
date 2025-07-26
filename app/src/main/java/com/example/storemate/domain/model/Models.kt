@@ -226,3 +226,24 @@ val sampleTransactions = listOf(
     )
 )
 
+val defaultSupplier = Supplier(
+    id = 1,
+    name = "Supplier A",
+    contactPerson = "John Doe",
+    phone = "123456789",
+    email = "a@example.com",
+    address = "Address 1"
+)
+
+val defaultProduct = Product(
+    id = 1,
+    name = "Product A",
+    description = "Description",
+    price = 10.0,
+    category = "Category",
+    barcode = "123456",
+    supplierId = 1,
+    currentStockLevel = 100,
+    minimumStockLevel = 10
+)
+

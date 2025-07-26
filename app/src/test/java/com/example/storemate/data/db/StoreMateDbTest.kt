@@ -2,12 +2,19 @@ package com.example.storemate.data.db
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.example.storemate.data.StoreMateDb
 import com.example.storemate.data.repositories.InventoryRepositoryImpl
 import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.model.Transaction
-import junit.framework.TestCase.*
+import com.example.storemate.domain.model.defaultProduct
+import com.example.storemate.domain.model.defaultSupplier
+import com.example.storemate.domain.model.sampleSuppliers
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -20,27 +27,6 @@ class StoreMateDbTest {
 
     private lateinit var db: StoreMateDb
     private lateinit var repository: InventoryRepositoryImpl
-
-    private val defaultSupplier = Supplier(
-        id = 1,
-        name = "Supplier A",
-        contactPerson = "John Doe",
-        phone = "123456789",
-        email = "a@example.com",
-        address = "Address 1"
-    )
-
-    private val defaultProduct = Product(
-        id = 1,
-        name = "Product A",
-        description = "Description",
-        price = 10.0,
-        category = "Category",
-        barcode = "123456",
-        supplierId = 1,
-        currentStockLevel = 100,
-        minimumStockLevel = 10
-    )
 
     @Before
     fun setUp() = runTest {
@@ -70,6 +56,37 @@ class StoreMateDbTest {
     ) = Transaction(date = date, type = type, productId = productId, quantity = quantity, notes = notes)
 
     //region products
+    @Test
+    fun `getLowStockProductsFlow emits products with low stock`() = runTest {
+        val lowStock = Product(1, "Water", "", 1.0, "Drinks", "333", 1, 2, 5)
+        val normalStock = Product(2, "Soda", "", 1.5, "Drinks", "444", 1, 10, 5)
+
+        repository.insertProduct(lowStock)
+        repository.insertProduct(normalStock)
+
+        repository.getLowStockProductsFlow().test {
+            val result = awaitItem()
+            assertEquals(1, result.size)
+            assertEquals("Water", result[0].name)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `getAllProductsFlow emits inserted products`() = runTest {
+        insertProduct()
+
+        repository.getAllProductsFlow().test {
+            val emitted = awaitItem().sortedBy { it.id }
+
+            val expected = defaultProduct
+
+            assertEquals(expected.name, emitted[0].name)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+
     @Test
     fun `insertProduct and getProductById return correct product`() = runTest {
         insertProduct()
@@ -165,6 +182,24 @@ class StoreMateDbTest {
 
     //region suppliers
     @Test
+    fun `getAllSuppliersFlow emits inserted suppliers`() = runTest {
+
+        sampleSuppliers.forEach { repository.insertSupplier(it) }
+
+        repository.getAllSuppliersFlow().test {
+            val emitted = awaitItem().sortedBy { it.id }
+
+            val expected = sampleSuppliers.sortedBy { it.id }
+
+            assertEquals(expected.size, emitted.size)
+            assertEquals(expected[0].name, emitted[0].name)
+            assertEquals(expected[1].name, emitted[1].name)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `insertSupplier should add a new supplier`() = runTest {
         val newSupplier = Supplier(2, "Supplier B", "Jane Smith", "987654321", "b@example.com", "Address 2")
         repository.insertSupplier(newSupplier)
@@ -215,6 +250,42 @@ class StoreMateDbTest {
     //endregion
 
     //region transactions
+    @Test
+    fun `getAllTransactionsFlow emits inserted transactions`() = runTest {
+        insertProduct()
+
+        val tx1 = createTransaction(type = "sale", quantity = 2)
+        val tx2 = createTransaction(type = "restock", quantity = 5)
+        repository.insertTransaction(tx1)
+        repository.insertTransaction(tx2)
+
+        repository.getAllTransactionsFlow().test {
+            val result = awaitItem()
+            assertEquals(2, result.size)
+            assertTrue(result.any { it.type == "sale" })
+            assertTrue(result.any { it.type == "restock" })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `getRecentTransactionsFlow emits limited recent transactions`() = runTest {
+        insertProduct()
+
+        val transactions = listOf(
+            createTransaction(type = "restock", quantity = 5),
+            createTransaction(type = "sale", quantity = 2),
+            createTransaction(type = "restock", quantity = 10)
+        )
+        transactions.forEach { repository.insertTransaction(it) }
+
+        repository.getRecentTransactionsFlow(2).test {
+            val result = awaitItem()
+            assertEquals(2, result.size)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `insertTransaction should add a new transaction`() = runTest {
         insertProduct()
