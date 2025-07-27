@@ -211,20 +211,6 @@ fun AddProductScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = state.minimumStockLevel,
-            onValueChange = { newValue ->
-                val filtered = newValue.filter { it.isDigit() }
-                onIntent(AddProductIntent.MinimumStockLevelChanged(filtered))
-            },
-            label = { Text("Minimum Stock Level") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
 
         Row(
             horizontalArrangement = Arrangement.End,
