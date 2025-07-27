@@ -73,7 +73,7 @@ class AddSupplierViewModel(
             return
         }
         if (!currentState.phone.isValidPhoneNumber()) {
-            showError("Error: Valid phone number is.")
+            showError("Error: Valid phone is required.")
             return
         }
         if (currentState.contactPerson.isBlank()) {
