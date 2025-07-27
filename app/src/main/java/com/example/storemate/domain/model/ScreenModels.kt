@@ -1,8 +1,11 @@
 package com.example.storemate.domain.model
 
-import com.example.storemate.common.isValidEmail
-import com.example.storemate.common.isValidPhoneNumber
-
+enum class SnackbarType {
+    Success,
+    Error,
+    Info,
+    Default
+}
 
 sealed class AppRoute(val route: String) {
     data object Dashboard : AppRoute("dashboard")
@@ -147,16 +150,7 @@ data class AddSupplierScreenState(
     val email: String = "",
     val address: String = "",
     val isSaving: Boolean = false
-){
-    fun isValid(): Boolean {
-        if (name.isBlank()) return false
-        if (address.isBlank()) return false
-        if (phone.isBlank() || !phone.isValidPhoneNumber()) return false
-        if (email.isBlank() || !email.isValidEmail()) return false
-        return true
-    }
-
-}
+)
 //endregion
 
 //region supplierlist

@@ -9,6 +9,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -23,6 +24,7 @@ import com.example.storemate.domain.model.AddTransactionEffect
 import com.example.storemate.domain.model.AppRoute
 import com.example.storemate.domain.model.DashboardEffect
 import com.example.storemate.domain.model.ProductListEffect
+import com.example.storemate.domain.model.SnackbarType
 import com.example.storemate.domain.model.SupplierListEffect
 import com.example.storemate.domain.model.TransactionListEffect
 import com.example.storemate.presentation.common.CustomSnackBar
@@ -41,15 +43,14 @@ fun AppNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarTypeState = remember { mutableStateOf(SnackbarType.Default) }
 
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) { snackbarData ->
-                val isError = snackbarData.visuals.message.contains("error", ignoreCase = true)
-                        || snackbarData.visuals.message.contains("fail", ignoreCase = true)
                 CustomSnackBar(
                     message = snackbarData.visuals.message,
-                    isError = isError
+                    type = snackbarTypeState.value
                 )
             }
         },
@@ -91,19 +92,46 @@ fun AppNavGraph(
                 }
             }
 
+            composable(AppRoute.Suppliers.route) {
+                val viewModel: SupplierListViewModel = koinViewModel()
+                SuppliersListRoute(viewModel = viewModel)
+                LaunchedEffect(Unit) {
+                    viewModel.effects.collectLatest { effect ->
+                        when (effect) {
+                            is SupplierListEffect.NavigateToSupplierDetail -> {
+                                navController.navigate(AppRoute.AddSupplier.route + "?supplierId=${effect.supplierId}")
+                            }
+
+                            is SupplierListEffect.NavigateToAddSupplier -> {
+                                navController.navigate(AppRoute.AddSupplier.route)
+                            }
+
+                            is SupplierListEffect.ShowErrorToUi -> {
+                                snackbarTypeState.value = SnackbarType.Error
+                                snackbarHostState.showSnackbar(
+                                    message = effect.message
+                                )
+                            }
+
+                            is SupplierListEffect.ShowMessageToUi -> {
+                                snackbarTypeState.value = SnackbarType.Info
+                                snackbarHostState.showSnackbar(
+                                    message = effect.message
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             composable(
                 route = AppRoute.AddSupplier.route + "?supplierId={supplierId}", arguments = listOf(
                     navArgument(name = "supplierId") {
                         type = NavType.IntType
                         defaultValue = -1
                     })
-            ) { backStackEntry ->
+            ) {
                 val viewModel: AddSupplierViewModel = koinViewModel()
-                backStackEntry.arguments?.getInt("supplierId")?.let { id ->
-                    if (id != -1) {
-                        viewModel.loadSupplier(id)
-                    }
-                }
                 AddSupplierRoute(viewModel = viewModel)
                 LaunchedEffect(Unit) {
                     viewModel.effects.collectLatest { effect ->
@@ -112,9 +140,12 @@ fun AppNavGraph(
                                 navController.popBackStack()
                             }
 
-                            is AddSupplierEffect.ShowError -> snackbarHostState.showSnackbar(
-                                message = effect.message
-                            )
+                            is AddSupplierEffect.ShowError -> {
+                                snackbarTypeState.value = SnackbarType.Error
+                                snackbarHostState.showSnackbar(
+                                    message = effect.message
+                                )
+                            }
                         }
                     }
                 }
@@ -135,12 +166,14 @@ fun AppNavGraph(
                             }
 
                             is ProductListEffect.ShowErrorToUi -> {
+                                snackbarTypeState.value = SnackbarType.Error
                                 snackbarHostState.showSnackbar(
-                                    message = "Error:" + effect.message
+                                    message = effect.message
                                 )
                             }
 
                             is ProductListEffect.ShowMessageToUi -> {
+                                snackbarTypeState.value = SnackbarType.Info
                                 snackbarHostState.showSnackbar(
                                     message = effect.message
                                 )
@@ -156,15 +189,9 @@ fun AppNavGraph(
                         type = NavType.IntType
                         defaultValue = -1
                     })
-            ) { backStackEntry ->
+            ) {
                 val viewModel: AddProductViewModel = koinViewModel()
                 AddProductRoute(viewModel = viewModel)
-
-                backStackEntry.arguments?.getInt("productId")?.let { id ->
-                    if (id != -1) {
-                        viewModel.loadProduct(id)
-                    }
-                }
                 LaunchedEffect(Unit) {
                     viewModel.effects.collectLatest { effect ->
                         when (effect) {
@@ -172,43 +199,16 @@ fun AppNavGraph(
                                 navController.popBackStack()
                             }
 
-                            is AddProductEffect.ShowError -> snackbarHostState.showSnackbar(
-                                message = effect.message
-                            )
+                            is AddProductEffect.ShowError -> {
+                                snackbarTypeState.value = SnackbarType.Error
+                                snackbarHostState.showSnackbar(
+                                    message = effect.message
+                                )
+                            }
 
                             AddProductEffect.NavigateToAddSupplier -> navController.navigate(
                                 AppRoute.AddSupplier.route
                             )
-                        }
-                    }
-                }
-            }
-
-            composable(AppRoute.Suppliers.route) {
-                val viewModel: SupplierListViewModel = koinViewModel()
-                SuppliersListRoute(viewModel = viewModel)
-                LaunchedEffect(Unit) {
-                    viewModel.effects.collectLatest { effect ->
-                        when (effect) {
-                            is SupplierListEffect.NavigateToSupplierDetail -> {
-                                navController.navigate(AppRoute.AddSupplier.route + "?supplierId=${effect.supplierId}")
-                            }
-
-                            is SupplierListEffect.NavigateToAddSupplier -> {
-                                navController.navigate(AppRoute.AddSupplier.route)
-                            }
-
-                            is SupplierListEffect.ShowErrorToUi -> {
-                                snackbarHostState.showSnackbar(
-                                    message = effect.message
-                                )
-                            }
-
-                            is SupplierListEffect.ShowMessageToUi -> {
-                                snackbarHostState.showSnackbar(
-                                    message = effect.message
-                                )
-                            }
                         }
                     }
                 }
@@ -224,10 +224,13 @@ fun AppNavGraph(
                                 navController.popBackStack()
                             }
 
-                            is AddTransactionEffect.ShowErrorToUi -> snackbarHostState.showSnackbar(
-                                message =
-                                    effect.message
-                            )
+                            is AddTransactionEffect.ShowErrorToUi -> {
+                                snackbarTypeState.value = SnackbarType.Error
+                                snackbarHostState.showSnackbar(
+                                    message =
+                                        effect.message
+                                )
+                            }
                         }
                     }
                 }
@@ -244,12 +247,14 @@ fun AppNavGraph(
                             }
 
                             is TransactionListEffect.ShowErrorToUi -> {
+                                snackbarTypeState.value = SnackbarType.Error
                                 snackbarHostState.showSnackbar(
                                     message = effect.message
                                 )
                             }
 
                             is TransactionListEffect.ShowMessageToUi -> {
+                                snackbarTypeState.value = SnackbarType.Info
                                 snackbarHostState.showSnackbar(
                                     message = effect.message
                                 )
@@ -261,6 +266,7 @@ fun AppNavGraph(
         }
     }
 }
+
 
 
 

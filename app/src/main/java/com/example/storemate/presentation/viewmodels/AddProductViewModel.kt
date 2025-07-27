@@ -1,5 +1,6 @@
 package com.example.storemate.presentation.viewmodels
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.storemate.common.BarcodeScanner
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class AddProductViewModel(
+    savedStateHandle: SavedStateHandle,
     private val repository: InventoryRepository,
     private val barcodeScanner: BarcodeScanner
 ) : ViewModel() {
@@ -34,11 +36,18 @@ class AddProductViewModel(
     private var productIdToEdit: Int? = null
 
     init {
+        if (savedStateHandle.contains("productId")) {
+            savedStateHandle.get<Int>("productId")?.let { productId ->
+                if (productId != 1) {
+                    loadProduct(productId)
+                }
+            }
+        }
         observeBarcodeScan()
         observeSuppliers()
     }
 
-    fun loadProduct(productId: Int) {
+    private fun loadProduct(productId: Int) {
         viewModelScope.launch {
             repository.getProductById(productId)?.let { product ->
                 repository.getSupplierById(product.supplierId)?.let {
@@ -149,22 +158,22 @@ class AddProductViewModel(
         val supplierId = currentState.supplierId
 
         if (currentState.name.isBlank()) {
-            sendError("Error: Name is required")
+            sendError("Name is required")
             return
         }
 
         if (priceDouble == null || priceDouble <= 0) {
-            sendError("Error: Price must be a positive number")
+            sendError("Price must be a positive number")
             return
         }
 
         if (supplierId == null) {
-            sendError("Error: Supplier must be selected")
+            sendError("Supplier must be selected")
             return
         }
 
         if (!currentState.isValid()) {
-            sendError("Error: All fields must be completed")
+            sendError("All fields must be completed")
             return
         }
 

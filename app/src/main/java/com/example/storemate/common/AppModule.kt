@@ -37,8 +37,8 @@ val appModule = module {
 
     viewModel { DashboardViewModel(get()) }
     viewModel { ProductListViewModel(get()) }
-    viewModel { AddProductViewModel(get(), get()) }
-    viewModel { AddSupplierViewModel(get()) }
+    viewModel { AddProductViewModel(get(), get(), get()) }
+    viewModel { AddSupplierViewModel(get(), get()) }
     viewModel { SupplierListViewModel(get()) }
     viewModel { TransactionListViewModel(get()) }
     viewModel { AddTransactionViewModel(get()) }

@@ -1,5 +1,6 @@
 package com.example.storemate.presentation.viewmodels
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.storemate.common.isValidEmail
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AddSupplierViewModel(
+    savedStateHandle: SavedStateHandle,
     private val repository: InventoryRepository
 ) : ViewModel() {
 
@@ -29,7 +31,17 @@ class AddSupplierViewModel(
 
     private var supplierIdToEdit: Int? = null
 
-    fun loadSupplier(supplierId: Int) {
+    init {
+        if (savedStateHandle.contains("supplierId")) {
+            savedStateHandle.get<Int>("supplierId")?.let { supplierId ->
+                if (supplierId != -1) {
+                    loadSupplier(supplierId)
+                }
+            }
+        }
+    }
+
+    private fun loadSupplier(supplierId: Int) {
         viewModelScope.launch {
             repository.getSupplierById(supplierId)?.let { supplier ->
                 updateState { currentState ->
@@ -69,23 +81,23 @@ class AddSupplierViewModel(
 
         // Validate required fields
         if (currentState.name.isBlank()) {
-            showError("Error: Supplier name is required.")
+            showError("Supplier name is required.")
             return
         }
         if (!currentState.phone.isValidPhoneNumber()) {
-            showError("Error: Valid phone is required.")
+            showError("Valid phone is required.")
             return
         }
         if (currentState.contactPerson.isBlank()) {
-            showError("Error: Contact person is required.")
+            showError("Contact person is required.")
             return
         }
         if (!currentState.email.isValidEmail()) {
-            showError("Error: Valid email is required.")
+            showError("Valid email is required.")
             return
         }
         if (currentState.address.isBlank()) {
-            showError("Error: Address is required.")
+            showError("Address is required.")
             return
         }
         // Other validations can be added here
