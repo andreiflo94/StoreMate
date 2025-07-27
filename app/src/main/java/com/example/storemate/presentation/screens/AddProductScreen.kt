@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -212,14 +213,18 @@ fun AddProductScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val keyboardController = LocalSoftwareKeyboardController.current
+
         Row(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.fillMaxWidth()
         ) {
             Button(
-                onClick = { onIntent(AddProductIntent.SaveProduct) },
+                onClick = {
+                    keyboardController?.hide()
+                    onIntent(AddProductIntent.SaveProduct)
+                },
                 enabled = !state.isSaving
-                        && state.isValid()
             ) {
                 if (state.isSaving) {
                     CircularProgressIndicator(

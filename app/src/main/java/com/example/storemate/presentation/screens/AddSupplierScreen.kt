@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -138,14 +139,18 @@ fun AddSupplierScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val keyboardController = LocalSoftwareKeyboardController.current
+
         Row(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.fillMaxWidth()
         ) {
             Button(
-                onClick = { onIntent(AddSupplierIntent.SaveSupplier) },
-                enabled = !state.isSaving && state.name.isNotBlank()
-                        && state.isValid()
+                onClick = {
+                    keyboardController?.hide()
+                    onIntent(AddSupplierIntent.SaveSupplier)
+                },
+                enabled = !state.isSaving
             ) {
                 if (state.isSaving) {
                     CircularProgressIndicator(

@@ -2,6 +2,8 @@ package com.example.storemate.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.storemate.common.isValidEmail
+import com.example.storemate.common.isValidPhoneNumber
 import com.example.storemate.domain.model.AddSupplierEffect
 import com.example.storemate.domain.model.AddSupplierIntent
 import com.example.storemate.domain.model.AddSupplierScreenState
@@ -67,11 +69,23 @@ class AddSupplierViewModel(
 
         // Validate required fields
         if (currentState.name.isBlank()) {
-            showError("Supplier name is required.")
+            showError("Error: Supplier name is required.")
             return
         }
-        if (currentState.phone.isBlank()) {
-            showError("Phone is required.")
+        if (!currentState.phone.isValidPhoneNumber()) {
+            showError("Error: Valid phone number is.")
+            return
+        }
+        if (currentState.contactPerson.isBlank()) {
+            showError("Error: Contact person is required.")
+            return
+        }
+        if (!currentState.email.isValidEmail()) {
+            showError("Error: Valid email is required.")
+            return
+        }
+        if (currentState.address.isBlank()) {
+            showError("Error: Address is required.")
             return
         }
         // Other validations can be added here

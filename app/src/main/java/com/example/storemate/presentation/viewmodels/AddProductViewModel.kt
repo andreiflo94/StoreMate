@@ -149,17 +149,22 @@ class AddProductViewModel(
         val supplierId = currentState.supplierId
 
         if (currentState.name.isBlank()) {
-            sendError("Name is required")
+            sendError("Error: Name is required")
             return
         }
 
         if (priceDouble == null || priceDouble <= 0) {
-            sendError("Price must be a positive number")
+            sendError("Error: Price must be a positive number")
             return
         }
 
         if (supplierId == null) {
-            sendError("Supplier must be selected")
+            sendError("Error: Supplier must be selected")
+            return
+        }
+
+        if (!currentState.isValid()) {
+            sendError("Error: All fields must be completed")
             return
         }
 
