@@ -149,7 +149,8 @@ data class AddSupplierScreenState(
     val phone: String = "",
     val email: String = "",
     val address: String = "",
-    val isSaving: Boolean = false
+    val isSaving: Boolean = false,
+    var supplierIdToEdit: Int? = null
 )
 //endregion
 
@@ -217,14 +218,12 @@ sealed interface AddTransactionEffect {
 
 data class AddTransactionScreenState(
     val productId: Int? = null,
-    val type: String? = null, // "IN" or "OUT"
+    val type: String? = null,
     val quantity: String = "",
     val notes: String = "",
 
     val productOptions: List<Pair<Int, String>> = emptyList(),
-
-    val isSubmitting: Boolean = false,
-    val validationError: String? = null
+    val isSubmitting: Boolean = false
 )
 
 //endregion

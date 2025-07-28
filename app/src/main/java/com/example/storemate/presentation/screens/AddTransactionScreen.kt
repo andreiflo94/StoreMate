@@ -1,5 +1,6 @@
 package com.example.storemate.presentation.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
@@ -27,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.storemate.domain.model.AddTransactionIntent
 import com.example.storemate.domain.model.AddTransactionScreenState
 import com.example.storemate.domain.model.TransactionType
+import com.example.storemate.presentation.UiState
 import com.example.storemate.presentation.common.DropdownMenuList
 import com.example.storemate.presentation.common.DropdownMenuMap
 import com.example.storemate.presentation.viewmodels.AddTransactionViewModel
@@ -35,9 +38,27 @@ import com.example.storemate.presentation.viewmodels.AddTransactionViewModel
 fun AddTransactionRoute(
     viewModel: AddTransactionViewModel
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    when (uiState) {
+        is UiState.Loading -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
 
-    AddTransactionScreen(state = state, onIntent = viewModel::onIntent)
+        is UiState.Error -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = (uiState as UiState.Error).message)
+            }
+        }
+
+        is UiState.Success -> {
+            AddTransactionScreen(
+                state = (uiState as UiState.Success<AddTransactionScreenState>).data,
+                onIntent = viewModel::onIntent
+            )
+        }
+    }
 }
 
 @Composable
@@ -104,11 +125,6 @@ fun AddTransactionScreen(
                 imeAction = ImeAction.Next
             ),
         )
-
-        if (state.validationError != null) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(state.validationError, color = MaterialTheme.colorScheme.error)
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

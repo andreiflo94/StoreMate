@@ -37,6 +37,21 @@ class SupplierListViewModel(
         observeSearch()
     }
 
+    fun onIntent(intent: SupplierListIntent) {
+        when (intent) {
+            is SupplierListIntent.SearchChanged -> _searchQuery.value = intent.query
+            is SupplierListIntent.DeleteSupplier -> handleDeleteSupplier(intent)
+            is SupplierListIntent.SupplierClicked -> emitEffect(
+                SupplierListEffect.NavigateToSupplierDetail(
+                    intent.supplierId
+                )
+            )
+
+            SupplierListIntent.NavigateToAddSupplier -> emitEffect(SupplierListEffect.NavigateToAddSupplier)
+            SupplierListIntent.ClearSearch -> _searchQuery.value = ""
+        }
+    }
+
     @OptIn(FlowPreview::class)
     private fun observeSearch() {
         viewModelScope.launch {
@@ -46,21 +61,19 @@ class SupplierListViewModel(
                     query to suppliers
                 }
                 .catch { throwable ->
-                    _uiState.value = UiState.Error("Filtering failed: ${throwable.message}")
+                    emitEffect(SupplierListEffect.ShowErrorToUi("Filtering failed: ${throwable.message}"))
                 }
                 .collectLatest { (query, suppliers) ->
                     val filtered = suppliers.filter { supplier ->
                         query.isBlank() || supplier.name.contains(query, ignoreCase = true)
                     }
-                    val currentState =
-                        (_uiState.value as? UiState.Success)?.data ?: SupplierListScreenState()
 
-                    _uiState.value = UiState.Success(
-                        currentState.copy(
+                    updateState { current ->
+                        current.copy(
                             suppliers = filtered,
                             searchQuery = query
                         )
-                    )
+                    }
                 }
         }
     }
@@ -82,42 +95,30 @@ class SupplierListViewModel(
         }
     }
 
-    fun onIntent(action: SupplierListIntent) {
-        when (action) {
-            is SupplierListIntent.SearchChanged -> {
-                _searchQuery.value = action.query
-            }
+    private fun updateState(reducer: (SupplierListScreenState) -> SupplierListScreenState) {
+        val currentState = (_uiState.value as? UiState.Success)?.data ?: return
+        _uiState.value = UiState.Success(reducer(currentState))
+    }
 
-            is SupplierListIntent.DeleteSupplier -> {
-                viewModelScope.launch {
-                    try {
-                        repository.deleteSupplier(action.supplier)
-                        _effects.emit(SupplierListEffect.ShowMessageToUi("Supplier deleted"))
-                    } catch (e: Exception) {
-                        if (e.message?.contains("constraint") == true) {
-                            _effects.emit(SupplierListEffect.ShowErrorToUi("Failed to delete supplier, first delete suppliers products"))
-                        } else {
-                            _effects.emit(SupplierListEffect.ShowErrorToUi("Failed to delete supplier: ${e.message}"))
-                        }
-                    }
+    private fun handleDeleteSupplier(intent: SupplierListIntent.DeleteSupplier) {
+        viewModelScope.launch {
+            try {
+                repository.deleteSupplier(intent.supplier)
+                emitEffect(SupplierListEffect.ShowMessageToUi("Supplier deleted"))
+            } catch (e: Exception) {
+                val errorMessage = if (e.message?.contains("constraint") == true) {
+                    "Failed to delete supplier, first delete supplier's products"
+                } else {
+                    "Failed to delete supplier: ${e.message}"
                 }
+                emitEffect(SupplierListEffect.ShowErrorToUi(errorMessage))
             }
+        }
+    }
 
-            is SupplierListIntent.SupplierClicked -> {
-                viewModelScope.launch {
-                    _effects.emit(SupplierListEffect.NavigateToSupplierDetail(action.supplierId))
-                }
-            }
-
-            SupplierListIntent.NavigateToAddSupplier -> {
-                viewModelScope.launch {
-                    _effects.emit(SupplierListEffect.NavigateToAddSupplier)
-                }
-            }
-
-            SupplierListIntent.ClearSearch -> {
-                _searchQuery.value = ""
-            }
+    private fun emitEffect(effect: SupplierListEffect) {
+        viewModelScope.launch {
+            _effects.emit(effect)
         }
     }
 }

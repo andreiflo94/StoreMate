@@ -39,6 +39,23 @@ class ProductListViewModel(
         observeSearchAndFilters()
     }
 
+    fun onIntent(intent: ProductListIntent) {
+        when (intent) {
+            is ProductListIntent.SearchChanged -> _searchQuery.value = intent.query
+            is ProductListIntent.CategorySelected -> _selectedCategory.value = intent.category
+            is ProductListIntent.SupplierSelected -> _selectedSupplierId.value = intent.supplierId
+            is ProductListIntent.DeleteProduct -> handleDeleteProduct(intent)
+            ProductListIntent.ClearFilters -> clearFilters()
+            is ProductListIntent.ProductClicked -> emitEffect(
+                ProductListEffect.NavigateToProductDetail(
+                    intent.productId
+                )
+            )
+
+            ProductListIntent.NavigateToAddProduct -> emitEffect(ProductListEffect.NavigateToAddProduct)
+        }
+    }
+
     @OptIn(FlowPreview::class)
     private fun observeSearchAndFilters() {
         viewModelScope.launch {
@@ -50,7 +67,7 @@ class ProductListViewModel(
             ) { query, category, supplierId, products ->
                 Triple(query, category, supplierId) to products
             }.catch { throwable ->
-                _uiState.value = UiState.Error("Filtering failed: ${throwable.message}")
+                emitEffect(ProductListEffect.ShowErrorToUi("Filtering failed: ${throwable.message}"))
             }.collectLatest { (filters, products) ->
                 val (query, category, supplierId) = filters
 
@@ -58,26 +75,23 @@ class ProductListViewModel(
                     val matchesQuery =
                         query.isBlank() || product.name.contains(query, ignoreCase = true)
                     val matchesCategory = category == null || product.category == category
-                    val matchesSupplier =
-                        supplierId == null || product.supplierId == supplierId.toInt()
+                    val matchesSupplier = supplierId == null || product.supplierId == supplierId
                     matchesQuery && matchesCategory && matchesSupplier
                 }
 
-                val currentState =
-                    (_uiState.value as? UiState.Success)?.data ?: return@collectLatest
+                val categories = products.map { it.category }.distinct()
+                val suppliers = repository.getAllSuppliers().map { it.id to it.name }
 
-                val suppliers = repository.getAllSuppliers()
-
-                _uiState.value = UiState.Success(
-                    currentState.copy(
+                updateState { current ->
+                    current.copy(
                         products = filtered,
                         searchQuery = query,
                         selectedCategory = category,
                         selectedSupplierId = supplierId,
-                        categories = products.map { it.category }.distinct(),
-                        suppliers = suppliers.map { it.id to it.name }
+                        categories = categories,
+                        suppliers = suppliers
                     )
-                )
+                }
             }
         }
     }
@@ -94,7 +108,7 @@ class ProductListViewModel(
                     ProductListScreenState(
                         products = products,
                         categories = categories,
-                        suppliers = suppliers,
+                        suppliers = suppliers
                     )
                 )
             } catch (e: Exception) {
@@ -103,50 +117,31 @@ class ProductListViewModel(
         }
     }
 
-    fun onIntent(action: ProductListIntent) {
-        when (action) {
-            is ProductListIntent.SearchChanged -> {
-                _searchQuery.value = action.query
-            }
+    private fun updateState(reducer: (ProductListScreenState) -> ProductListScreenState) {
+        val currentState = (_uiState.value as? UiState.Success)?.data ?: return
+        _uiState.value = UiState.Success(reducer(currentState))
+    }
 
-            is ProductListIntent.CategorySelected -> {
-                _selectedCategory.value = action.category
-            }
+    private fun clearFilters() {
+        _searchQuery.value = ""
+        _selectedCategory.value = null
+        _selectedSupplierId.value = null
+    }
 
-            is ProductListIntent.SupplierSelected -> {
-                _selectedSupplierId.value = action.supplierId
-            }
-
-            is ProductListIntent.DeleteProduct -> {
-                viewModelScope.launch {
-                    try {
-                        repository.deleteProduct(action.product)
-                        _effects.emit(ProductListEffect.ShowMessageToUi("Product deleted"))
-                    } catch (e: Exception) {
-                        _effects.emit(ProductListEffect.ShowErrorToUi("Failed to delete product: ${e.message}"))
-                    }
-                }
-            }
-
-            ProductListIntent.ClearFilters -> {
-                _searchQuery.value = ""
-                _selectedCategory.value = null
-                _selectedSupplierId.value = null
-            }
-
-            is ProductListIntent.ProductClicked -> {
-                viewModelScope.launch {
-                    _effects.emit(ProductListEffect.NavigateToProductDetail(productId = action.productId))
-                }
-            }
-
-            ProductListIntent.NavigateToAddProduct -> {
-                viewModelScope.launch {
-                    _effects.emit(ProductListEffect.NavigateToAddProduct)
-                }
+    private fun handleDeleteProduct(intent: ProductListIntent.DeleteProduct) {
+        viewModelScope.launch {
+            try {
+                repository.deleteProduct(intent.product)
+                emitEffect(ProductListEffect.ShowMessageToUi("Product deleted"))
+            } catch (e: Exception) {
+                emitEffect(ProductListEffect.ShowErrorToUi("Failed to delete product: ${e.message}"))
             }
         }
     }
 
+    private fun emitEffect(effect: ProductListEffect) {
+        viewModelScope.launch {
+            _effects.emit(effect)
+        }
+    }
 }
-

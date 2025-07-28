@@ -29,33 +29,12 @@ class AddSupplierViewModel(
     private val _effects = MutableSharedFlow<AddSupplierEffect>()
     val effects = _effects.asSharedFlow()
 
-    private var supplierIdToEdit: Int? = null
-
     init {
         if (savedStateHandle.contains("supplierId")) {
             savedStateHandle.get<Int>("supplierId")?.let { supplierId ->
                 if (supplierId != -1) {
                     loadSupplier(supplierId)
                 }
-            }
-        }
-    }
-
-    private fun loadSupplier(supplierId: Int) {
-        viewModelScope.launch {
-            repository.getSupplierById(supplierId)?.let { supplier ->
-                updateState { currentState ->
-                    currentState.copy(
-                        screenTitle = "Edit supplier",
-                        name = supplier.name,
-                        contactPerson = supplier.contactPerson,
-                        phone = supplier.phone,
-                        email = supplier.email,
-                        address = supplier.address,
-                        isSaving = false
-                    )
-                }
-                supplierIdToEdit = supplierId
             }
         }
     }
@@ -71,9 +50,28 @@ class AddSupplierViewModel(
         }
     }
 
-    private fun updateState(update: (AddSupplierScreenState) -> AddSupplierScreenState) {
+    private fun loadSupplier(supplierId: Int) {
+        viewModelScope.launch {
+            repository.getSupplierById(supplierId)?.let { supplier ->
+                updateState { currentState ->
+                    currentState.copy(
+                        screenTitle = "Edit supplier",
+                        name = supplier.name,
+                        contactPerson = supplier.contactPerson,
+                        phone = supplier.phone,
+                        email = supplier.email,
+                        address = supplier.address,
+                        isSaving = false,
+                        supplierIdToEdit = supplierId
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateState(reducer: (AddSupplierScreenState) -> AddSupplierScreenState) {
         val currentState = (_uiState.value as? UiState.Success)?.data ?: AddSupplierScreenState()
-        _uiState.value = UiState.Success(update(currentState))
+        _uiState.value = UiState.Success(reducer(currentState))
     }
 
     private fun saveSupplier() {
@@ -107,14 +105,14 @@ class AddSupplierViewModel(
         viewModelScope.launch {
             try {
                 val supplier = Supplier(
-                    id = supplierIdToEdit ?: 0,
+                    id = currentState.supplierIdToEdit ?: 0,
                     name = currentState.name,
                     contactPerson = currentState.contactPerson,
                     phone = currentState.phone,
                     email = currentState.email,
                     address = currentState.address
                 )
-                supplierIdToEdit?.let {
+                currentState.supplierIdToEdit?.let {
                     repository.updateSupplier(supplier)
                 } ?: run {
                     repository.insertSupplier(supplier)

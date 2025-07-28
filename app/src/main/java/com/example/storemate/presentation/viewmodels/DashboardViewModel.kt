@@ -9,7 +9,9 @@ import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -23,38 +25,53 @@ class DashboardViewModel(
     val uiState: StateFlow<UiState<DashboardScreenState>> = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<DashboardEffect>()
-    val effects = _effects
+    val effects: SharedFlow<DashboardEffect> = _effects.asSharedFlow()
 
     init {
-        observeDashboardData()
+        observeData()
     }
 
-    private fun observeDashboardData() {
+    fun onIntent(intent: DashboardIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                DashboardIntent.NavigateToProducts ->
+                    emitEffect(DashboardEffect.NavigateToProductsEffect)
+
+                DashboardIntent.NavigateToSuppliers ->
+                    emitEffect(DashboardEffect.NavigateToSuppliersEffect)
+
+                DashboardIntent.NavigateToStockManagement ->
+                    emitEffect(DashboardEffect.NavigateToStockManagementEffect)
+
+                DashboardIntent.NavigateToTransactions ->
+                    emitEffect(DashboardEffect.NavigateToTransactionsEffect)
+            }
+        }
+    }
+
+    private fun observeData() {
         viewModelScope.launch {
             combine(
                 repository.getLowStockProductsFlow(),
                 repository.getRecentTransactionsWithProductNameFlow(limit = 10)
-            ) { lowStockProducts, recentTransactions ->
+            ) { lowStock, transactions ->
                 DashboardScreenState(
-                    lowStockItems = lowStockProducts,
-                    recentTransactions = recentTransactions
+                    lowStockItems = lowStock,
+                    recentTransactions = transactions
                 )
             }.catch { e ->
                 _uiState.value = UiState.Error("Failed to load dashboard: ${e.message}")
-            }.collect { dashboardState ->
-                _uiState.value = UiState.Success(dashboardState)
+            }.collect { state ->
+                updateState { state }
             }
         }
     }
 
-    fun onIntent(dashboardIntent: DashboardIntent) {
-        viewModelScope.launch {
-            when (dashboardIntent) {
-                DashboardIntent.NavigateToProducts -> _effects.emit(DashboardEffect.NavigateToProductsEffect)
-                DashboardIntent.NavigateToStockManagement -> _effects.emit(DashboardEffect.NavigateToStockManagementEffect)
-                DashboardIntent.NavigateToSuppliers -> _effects.emit(DashboardEffect.NavigateToSuppliersEffect)
-                DashboardIntent.NavigateToTransactions -> _effects.emit(DashboardEffect.NavigateToTransactionsEffect)
-            }
-        }
+    private fun updateState(reducer: () -> DashboardScreenState) {
+        _uiState.value = UiState.Success(reducer())
+    }
+
+    private suspend fun emitEffect(effect: DashboardEffect) {
+        _effects.emit(effect)
     }
 }

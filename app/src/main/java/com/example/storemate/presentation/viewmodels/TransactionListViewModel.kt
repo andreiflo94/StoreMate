@@ -40,6 +40,16 @@ class TransactionListViewModel(
         observeSearchAndFilters()
     }
 
+    fun onIntent(intent: TransactionListIntent) {
+        when (intent) {
+            is TransactionListIntent.SearchChanged -> _searchQuery.value = intent.query
+            is TransactionListIntent.SortOrderChanged -> _sortAscending.value = intent.ascending
+            is TransactionListIntent.TypeFilterChanged -> _selectedType.value = intent.type
+            is TransactionListIntent.ClearFilters -> clearFilters()
+            TransactionListIntent.NavigateToAddTransaction -> emitEffect(TransactionListEffect.NavigateToAddTransaction)
+        }
+    }
+
     @OptIn(FlowPreview::class)
     private fun observeSearchAndFilters() {
         viewModelScope.launch {
@@ -69,19 +79,17 @@ class TransactionListViewModel(
                     else list.sortedByDescending { it.transaction.date }
                 }
 
-                val currentState =
-                    (_uiState.value as? UiState.Success)?.data ?: return@collectLatest
-                val allTypes = transactions.map { it.transaction.type }.distinct()
+                val typeOptions = transactions.map { it.transaction.type }.distinct()
 
-                _uiState.value = UiState.Success(
-                    currentState.copy(
+                updateState { current ->
+                    current.copy(
                         transactions = ArrayList(filtered),
                         searchQuery = query,
                         selectedType = type,
-                        typeOptions = allTypes,
+                        typeOptions = typeOptions,
                         sortAscending = sortAscending
                     )
-                )
+                }
             }
         }
     }
@@ -106,20 +114,19 @@ class TransactionListViewModel(
         }
     }
 
-    fun onIntent(intent: TransactionListIntent) {
-        when (intent) {
-            is TransactionListIntent.SearchChanged -> _searchQuery.value = intent.query
-            is TransactionListIntent.SortOrderChanged -> _sortAscending.value = intent.ascending
-            is TransactionListIntent.TypeFilterChanged -> _selectedType.value = intent.type
-            is TransactionListIntent.ClearFilters -> {
-                _searchQuery.value = ""
-                _selectedType.value = null
-            }
-            TransactionListIntent.NavigateToAddTransaction -> {
-                viewModelScope.launch {
-                    _effects.emit(TransactionListEffect.NavigateToAddTransaction)
-                }
-            }
+    private fun updateState(reducer: (TransactionListScreenState) -> TransactionListScreenState) {
+        val currentState = (_uiState.value as? UiState.Success)?.data ?: return
+        _uiState.value = UiState.Success(reducer(currentState))
+    }
+
+    private fun clearFilters() {
+        _searchQuery.value = ""
+        _selectedType.value = null
+    }
+
+    private fun emitEffect(effect: TransactionListEffect) {
+        viewModelScope.launch {
+            _effects.emit(effect)
         }
     }
 }

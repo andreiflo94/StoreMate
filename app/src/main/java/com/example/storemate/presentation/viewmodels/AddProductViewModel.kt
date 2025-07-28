@@ -8,7 +8,6 @@ import com.example.storemate.domain.model.AddProductEffect
 import com.example.storemate.domain.model.AddProductIntent
 import com.example.storemate.domain.model.AddProductScreenState
 import com.example.storemate.domain.model.Product
-import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
 import kotlinx.coroutines.CancellationException
@@ -32,7 +31,6 @@ class AddProductViewModel(
     private val _effects = MutableSharedFlow<AddProductEffect>()
     val effects = _effects.asSharedFlow()
 
-    private var currentState = AddProductScreenState()
     private var productIdToEdit: Int? = null
 
     init {
@@ -47,64 +45,40 @@ class AddProductViewModel(
         observeSuppliers()
     }
 
-    private fun loadProduct(productId: Int) {
-        viewModelScope.launch {
-            repository.getProductById(productId)?.let { product ->
-                repository.getSupplierById(product.supplierId)?.let {
-                    updateState(
-                        title = "Edit product",
-                        name = product.name,
-                        description = product.description,
-                        price = product.price.toString(),
-                        category = product.category,
-                        barcode = product.barcode,
-                        supplierId = it.id,
-                        currentStockLevel = product.currentStockLevel.toString(),
-                        minimumStockLevel = product.minimumStockLevel.toString(),
-                        suppliers = repository.getAllSuppliers(),
-                        isSaving = false
-                    )
-                    productIdToEdit = productId
-                }
-            }
-        }
-    }
-
-    private fun observeBarcodeScan() {
-        viewModelScope.launch {
-            barcodeScanner.barCodeResults.collect { barcode ->
-                barcode?.let {
-                    updateState(
-                        barcode = barcode
-                    )
-                }
-            }
-        }
-    }
-
-    private fun observeSuppliers() {
-        viewModelScope.launch {
-            repository.getAllSuppliersFlow()
-                .catch { e ->
-                    _uiState.value = UiState.Error("Failed to load suppliers")
-                }
-                .collect { suppliers ->
-                    currentState = currentState.copy(suppliers = suppliers)
-                    _uiState.value = UiState.Success(currentState)
-                }
-        }
-    }
-
     fun onIntent(intent: AddProductIntent) {
         when (intent) {
-            is AddProductIntent.NameChanged -> updateState(name = intent.name)
-            is AddProductIntent.DescriptionChanged -> updateState(description = intent.description)
-            is AddProductIntent.PriceChanged -> updateState(price = intent.price)
-            is AddProductIntent.CategoryChanged -> updateState(category = intent.category)
-            is AddProductIntent.BarcodeChanged -> updateState(barcode = intent.barcode)
-            is AddProductIntent.SupplierSelected -> updateState(supplierId = intent.supplierId)
-            is AddProductIntent.CurrentStockLevelChanged -> updateState(currentStockLevel = intent.level)
-            is AddProductIntent.MinimumStockLevelChanged -> updateState(minimumStockLevel = intent.level)
+            is AddProductIntent.NameChanged -> updateState {
+                it.copy(name = intent.name)
+            }
+
+            is AddProductIntent.DescriptionChanged -> updateState {
+                it.copy(description = intent.description)
+            }
+
+            is AddProductIntent.PriceChanged -> updateState {
+                it.copy(price = intent.price)
+            }
+
+            is AddProductIntent.CategoryChanged -> updateState {
+                it.copy(category = intent.category)
+            }
+
+            is AddProductIntent.BarcodeChanged -> updateState {
+                it.copy(barcode = intent.barcode)
+            }
+
+            is AddProductIntent.SupplierSelected -> updateState {
+                it.copy(supplierId = intent.supplierId)
+            }
+
+            is AddProductIntent.CurrentStockLevelChanged -> updateState {
+                it.copy(currentStockLevel = intent.level)
+            }
+
+            is AddProductIntent.MinimumStockLevelChanged -> updateState {
+                it.copy(minimumStockLevel = intent.level)
+            }
+
             is AddProductIntent.NavigateToNewSupplier -> navigateToAddSupplier()
             is AddProductIntent.SaveProduct -> saveProduct()
             AddProductIntent.ScanBarcode -> {
@@ -122,36 +96,66 @@ class AddProductViewModel(
         }
     }
 
-    private fun updateState(
-        title: String = currentState.screenTitle,
-        name: String = currentState.name,
-        description: String = currentState.description,
-        price: String = currentState.price,
-        category: String = currentState.category,
-        barcode: String = currentState.barcode,
-        supplierId: Int? = currentState.supplierId,
-        currentStockLevel: String = currentState.currentStockLevel,
-        minimumStockLevel: String = currentState.minimumStockLevel,
-        isSaving: Boolean = currentState.isSaving,
-        suppliers: List<Supplier> = currentState.suppliers
-    ) {
-        currentState = AddProductScreenState(
-            title,
-            name,
-            description,
-            price,
-            category,
-            barcode,
-            supplierId,
-            currentStockLevel,
-            minimumStockLevel,
-            suppliers,
-            isSaving
-        )
-        _uiState.value = UiState.Success(currentState)
+    private fun loadProduct(productId: Int) {
+        viewModelScope.launch {
+            repository.getProductById(productId)?.let { product ->
+                repository.getAllSuppliers().let { suppliers ->
+                    updateState {
+                        it.copy(
+                            screenTitle = "Edit product",
+                            name = product.name,
+                            description = product.description,
+                            price = product.price.toString(),
+                            category = product.category,
+                            barcode = product.barcode,
+                            supplierId = product.supplierId,
+                            currentStockLevel = product.currentStockLevel.toString(),
+                            minimumStockLevel = product.minimumStockLevel.toString(),
+                            suppliers = suppliers,
+                            isSaving = false
+                        )
+                    }
+                    productIdToEdit = productId
+                }
+            }
+        }
+    }
+
+    private fun observeBarcodeScan() {
+        viewModelScope.launch {
+            barcodeScanner.barCodeResults.collect { barcode ->
+                barcode?.let {
+                    updateState {
+                        it.copy(
+                            barcode = barcode
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeSuppliers() {
+        viewModelScope.launch {
+            repository.getAllSuppliersFlow()
+                .catch { _ ->
+                    _uiState.value = UiState.Error("Failed to load suppliers")
+                }
+                .collect { suppliers ->
+                    updateState {
+                        it.copy(suppliers = suppliers)
+                    }
+                }
+        }
+    }
+
+    private fun updateState(reducer: (AddProductScreenState) -> AddProductScreenState) {
+        val currentState = (_uiState.value as? UiState.Success)?.data ?: AddProductScreenState()
+        _uiState.value = UiState.Success(reducer(currentState))
     }
 
     private fun saveProduct() {
+        val currentState = (_uiState.value as? UiState.Success)?.data ?: AddProductScreenState()
         val priceDouble = currentState.price.toDoubleOrNull()
         val currentStock = currentState.currentStockLevel.toIntOrNull() ?: 0
         val minimumStock = currentState.minimumStockLevel.toIntOrNull() ?: 0
@@ -178,7 +182,9 @@ class AddProductViewModel(
         }
 
         // Set loading state
-        updateState(isSaving = true)
+        updateState {
+            it.copy(isSaving = true)
+        }
 
         viewModelScope.launch {
             try {
@@ -199,10 +205,14 @@ class AddProductViewModel(
                     repository.insertProduct(product)
                 }
                 // Set loading state
-                updateState(isSaving = false)
+                updateState {
+                    it.copy(isSaving = false)
+                }
                 productSaved()
             } catch (e: Exception) {
-                updateState(isSaving = false)
+                updateState {
+                    it.copy(isSaving = false)
+                }
                 sendError("Failed to save product: ${e.localizedMessage}")
             }
         }

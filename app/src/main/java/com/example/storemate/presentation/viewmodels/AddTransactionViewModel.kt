@@ -9,21 +9,21 @@ import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.Transaction
 import com.example.storemate.domain.model.TransactionType
 import com.example.storemate.domain.repositories.InventoryRepository
+import com.example.storemate.presentation.UiState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AddTransactionViewModel(
     private val repository: InventoryRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AddTransactionScreenState())
-    val uiState: StateFlow<AddTransactionScreenState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<AddTransactionScreenState>>(UiState.Loading)
+    val uiState: StateFlow<UiState<AddTransactionScreenState>> = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<AddTransactionEffect>()
     val effects: SharedFlow<AddTransactionEffect> = _effects.asSharedFlow()
@@ -31,45 +31,43 @@ class AddTransactionViewModel(
     init {
         viewModelScope.launch {
             val products = repository.getAllProducts()
-            _uiState.update {
-                it.copy(productOptions = products.map { p -> p.id to p.name })
-            }
+            val options = products.map { it.id to it.name }
+            updateState { it.copy(productOptions = options) }
         }
     }
 
     fun onIntent(intent: AddTransactionIntent) {
+        val currentState = (_uiState.value as? UiState.Success)?.data ?: AddTransactionScreenState()
+
         when (intent) {
-            is AddTransactionIntent.ProductSelected -> {
-                _uiState.update { it.copy(productId = intent.productId, validationError = null) }
+            is AddTransactionIntent.ProductSelected -> updateState {
+                it.copy(productId = intent.productId)
             }
 
-            is AddTransactionIntent.TypeSelected -> {
-                _uiState.update { it.copy(type = intent.type, validationError = null) }
+            is AddTransactionIntent.TypeSelected -> updateState {
+                it.copy(type = intent.type)
             }
 
-            is AddTransactionIntent.QuantityChanged -> {
-                _uiState.update { it.copy(quantity = intent.quantity, validationError = null) }
+            is AddTransactionIntent.QuantityChanged -> updateState {
+                it.copy(quantity = intent.quantity)
             }
 
-            is AddTransactionIntent.NotesChanged -> {
-                _uiState.update { it.copy(notes = intent.notes) }
+            is AddTransactionIntent.NotesChanged -> updateState {
+                it.copy(notes = intent.notes)
             }
 
-            AddTransactionIntent.SubmitTransaction -> {
-                submit()
-            }
+            AddTransactionIntent.SubmitTransaction -> submit(currentState)
         }
     }
 
-
-    private fun submit() {
-        val state = _uiState.value
-        val quantityInt = state.quantity.toIntOrNull()
-
-        if (!validateFields(state.productId, state.type, quantityInt)) return
-
+    private fun submit(state: AddTransactionScreenState) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSubmitting = true) }
+
+            val quantityInt = state.quantity.toIntOrNull()
+
+            if (!validateFields(state.productId, state.type, quantityInt)) return@launch
+
+            updateState { it.copy(isSubmitting = true) }
 
             val product = repository.getProductById(state.productId!!)
             if (!validateProduct(product)) return@launch
@@ -89,16 +87,20 @@ class AddTransactionViewModel(
             } catch (e: Exception) {
                 _effects.emit(AddTransactionEffect.ShowErrorToUi("Failed to save: ${e.message}"))
             } finally {
-                _uiState.update { it.copy(isSubmitting = false) }
+                updateState { it.copy(isSubmitting = false) }
             }
         }
     }
 
-    private fun validateFields(productId: Int?, type: String?, quantity: Int?): Boolean {
+    private fun updateState(transform: (AddTransactionScreenState) -> AddTransactionScreenState) {
+        val current = (_uiState.value as? UiState.Success)?.data ?: AddTransactionScreenState()
+        _uiState.value = UiState.Success(transform(current))
+    }
+
+    private suspend fun validateFields(productId: Int?, type: String?, quantity: Int?): Boolean {
         return if (productId == null || type.isNullOrBlank() || quantity == null || quantity <= 0) {
-            _uiState.update {
-                it.copy(validationError = "All fields must be filled and quantity must be > 0")
-            }
+            _effects.emit(AddTransactionEffect.ShowErrorToUi("Invalid product selected"))
+            updateState { it.copy(isSubmitting = false) }
             false
         } else true
     }
@@ -106,7 +108,7 @@ class AddTransactionViewModel(
     private suspend fun validateProduct(product: Product?): Boolean {
         return if (product == null) {
             _effects.emit(AddTransactionEffect.ShowErrorToUi("Invalid product selected"))
-            _uiState.update { it.copy(isSubmitting = false) }
+            updateState { it.copy(isSubmitting = false) }
             false
         } else true
     }
@@ -118,7 +120,7 @@ class AddTransactionViewModel(
     ): Boolean {
         return if (type == TransactionType.sale.toString() && product.currentStockLevel < quantity) {
             _effects.emit(AddTransactionEffect.ShowErrorToUi("Fail: Insufficient stock"))
-            _uiState.update { it.copy(isSubmitting = false) }
+            updateState { it.copy(isSubmitting = false) }
             false
         } else true
     }
@@ -143,10 +145,9 @@ class AddTransactionViewModel(
             TransactionType.restock.toString() -> product.currentStockLevel + quantity
             else -> {
                 _effects.emit(AddTransactionEffect.ShowErrorToUi("Invalid transaction type"))
-                _uiState.update { it.copy(isSubmitting = false) }
+                updateState { it.copy(isSubmitting = false) }
                 null
             }
         }
     }
-
 }
