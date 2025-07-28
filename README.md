@@ -19,7 +19,7 @@
 ## 🔍 Filtering Capabilities
 
 - **Products** can be filtered by:
-  - **Search query** (by name or description)
+  - **Search query** (by name)
   - **Category**
   - **Supplier**
 - **Suppliers** can be filtered by:
