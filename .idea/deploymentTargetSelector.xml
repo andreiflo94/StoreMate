@@ -8,7 +8,13 @@
       <SelectionState runConfigName="Tests in 'com.example.storemate.presentation'">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="AddSupplierScreenTest">
+      <SelectionState runConfigName="AddProductScreenTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="AddTransactionScreenTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="submit_transaction_success_shows_no_error_and_updates_ui()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
