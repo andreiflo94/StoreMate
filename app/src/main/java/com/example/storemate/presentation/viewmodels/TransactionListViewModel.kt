@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -54,7 +53,7 @@ class TransactionListViewModel(
     private fun observeSearchAndFilters() {
         viewModelScope.launch {
             combine(
-                _searchQuery.debounce(300),
+                _searchQuery,
                 _selectedType,
                 _sortAscending,
                 repository.getTransactionsWithProductNameFlow()

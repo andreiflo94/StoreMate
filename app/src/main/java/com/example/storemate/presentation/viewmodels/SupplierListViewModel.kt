@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 class SupplierListViewModel(
@@ -56,7 +55,6 @@ class SupplierListViewModel(
     private fun observeSearch() {
         viewModelScope.launch {
             _searchQuery
-                .debounce(300)
                 .combine(repository.getAllSuppliersFlow()) { query, suppliers ->
                     query to suppliers
                 }

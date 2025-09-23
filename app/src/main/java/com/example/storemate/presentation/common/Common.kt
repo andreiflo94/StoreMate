@@ -19,7 +19,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,16 +34,11 @@ fun SearchBar(
     searchQuery: String,
     onSearchChanged: (String) -> Unit
 ) {
-    var localQuery by remember { mutableStateOf(searchQuery) }
-
-    LaunchedEffect(localQuery) {
-        onSearchChanged(localQuery)
-    }
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
-        value = localQuery,
-        onValueChange = { localQuery = it },
+        value = searchQuery,
+        onValueChange = onSearchChanged,
         label = { Text("Search") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         singleLine = true

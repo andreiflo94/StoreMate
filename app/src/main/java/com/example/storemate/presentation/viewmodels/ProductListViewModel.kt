@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 class ProductListViewModel(
@@ -60,7 +59,7 @@ class ProductListViewModel(
     private fun observeSearchAndFilters() {
         viewModelScope.launch {
             combine(
-                _searchQuery.debounce(300),
+                _searchQuery,
                 _selectedCategory,
                 _selectedSupplierId,
                 repository.getAllProductsFlow()
