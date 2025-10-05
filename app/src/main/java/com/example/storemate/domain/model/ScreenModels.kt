@@ -15,6 +15,7 @@ sealed class AppRoute(val route: String) {
     data object Suppliers : AppRoute("suppliers")
     data object Transactions : AppRoute("transactions")
     data object AddTransaction : AppRoute("add_transaction")
+    data object Import : AppRoute("import")
 }
 
 //region dashboard
@@ -33,6 +34,7 @@ sealed interface DashboardIntent {
     data object NavigateToSuppliers : DashboardIntent
     data object NavigateToStockManagement : DashboardIntent
     data object NavigateToTransactions : DashboardIntent
+    data object NavigateToImport: DashboardIntent
 }
 
 sealed interface DashboardEffect {
@@ -40,6 +42,7 @@ sealed interface DashboardEffect {
     data object NavigateToSuppliersEffect : DashboardEffect
     data object NavigateToStockManagementEffect : DashboardEffect
     data object NavigateToTransactionsEffect : DashboardEffect
+    data object NavigateToImportEffect : DashboardEffect
 }
 //endregion
 

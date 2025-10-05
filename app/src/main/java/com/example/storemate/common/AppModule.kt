@@ -8,6 +8,7 @@ import com.example.storemate.presentation.viewmodels.AddProductViewModel
 import com.example.storemate.presentation.viewmodels.AddSupplierViewModel
 import com.example.storemate.presentation.viewmodels.AddTransactionViewModel
 import com.example.storemate.presentation.viewmodels.DashboardViewModel
+import com.example.storemate.presentation.viewmodels.ImportViewModel
 import com.example.storemate.presentation.viewmodels.ProductListViewModel
 import com.example.storemate.presentation.viewmodels.SupplierListViewModel
 import com.example.storemate.presentation.viewmodels.TransactionListViewModel
@@ -42,4 +43,5 @@ val appModule = module {
     viewModel { SupplierListViewModel(get()) }
     viewModel { TransactionListViewModel(get()) }
     viewModel { AddTransactionViewModel(get()) }
+    viewModel { ImportViewModel(get()) }
 }

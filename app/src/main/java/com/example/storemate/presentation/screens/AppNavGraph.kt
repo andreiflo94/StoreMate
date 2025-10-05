@@ -32,6 +32,7 @@ import com.example.storemate.presentation.viewmodels.AddProductViewModel
 import com.example.storemate.presentation.viewmodels.AddSupplierViewModel
 import com.example.storemate.presentation.viewmodels.AddTransactionViewModel
 import com.example.storemate.presentation.viewmodels.DashboardViewModel
+import com.example.storemate.presentation.viewmodels.ImportViewModel
 import com.example.storemate.presentation.viewmodels.ProductListViewModel
 import com.example.storemate.presentation.viewmodels.SupplierListViewModel
 import com.example.storemate.presentation.viewmodels.TransactionListViewModel
@@ -87,9 +88,18 @@ fun AppNavGraph(
                             DashboardEffect.NavigateToTransactionsEffect -> navController.navigate(
                                 AppRoute.Transactions.route
                             )
+
+                            DashboardEffect.NavigateToImportEffect -> {
+                                navController.navigate(AppRoute.Import.route)
+                            }
                         }
                     }
                 }
+            }
+
+            composable(AppRoute.Import.route) {
+                val viewModel: ImportViewModel = koinViewModel()
+                ImportRoute(viewModel = viewModel)
             }
 
             composable(AppRoute.Suppliers.route) {

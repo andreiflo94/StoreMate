@@ -12,8 +12,8 @@ import com.example.storemate.presentation.UiState
 fun ProductItemPreview() {
     ProductItem(
         product = sampleProducts[0],
-        onIntent = {},
-        onDeleteClicked = {}
+        onClick = {},
+        onDelete = {}
     )
 }
 

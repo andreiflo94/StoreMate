@@ -45,6 +45,10 @@ class DashboardViewModel(
 
                 DashboardIntent.NavigateToTransactions ->
                     emitEffect(DashboardEffect.NavigateToTransactionsEffect)
+
+                DashboardIntent.NavigateToImport -> {
+                    emitEffect(DashboardEffect.NavigateToImportEffect)
+                }
             }
         }
     }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Face
@@ -125,6 +126,11 @@ fun QuickAccessSection(onIntent: (DashboardIntent) -> Unit) {
                 QuickAccessButton("Stock management", Icons.Default.Create) {
                     onIntent(
                         DashboardIntent.NavigateToStockManagement
+                    )
+                }
+                QuickAccessButton("Import", Icons.Default.Add) {
+                    onIntent(
+                        DashboardIntent.NavigateToImport
                     )
                 }
             }

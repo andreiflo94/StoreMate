@@ -55,7 +55,7 @@ fun TransactionsRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box {
+    Box(Modifier.fillMaxSize()) {
         TransactionsScreen(uiState = uiState, onIntent = viewModel::onIntent)
 
         FloatingActionButton(
@@ -80,18 +80,15 @@ fun TransactionsScreen(
             .padding(16.dp)
     ) {
         Text(text = "Transactions", style = MaterialTheme.typography.headlineSmall)
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
         when (uiState) {
             is UiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-
             is UiState.Error -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(uiState.message)
             }
-
             is UiState.Success -> TransactionsListScreen(uiState.data, onIntent)
         }
     }
@@ -102,17 +99,16 @@ private fun TransactionsListScreen(
     state: TransactionListScreenState,
     onIntent: (TransactionListIntent) -> Unit
 ) {
+    var isAscending by remember(state.sortAscending) { mutableStateOf(state.sortAscending) }
+
     Column(Modifier.fillMaxSize()) {
         SearchBar(
             searchQuery = state.searchQuery,
             onSearchChanged = { onIntent(TransactionListIntent.SearchChanged(it)) }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
 
-        var isAscending by remember(state.sortAscending) {
-            mutableStateOf(state.sortAscending)
-        }
         Row {
             SortByDateCheckbox(
                 currentValue = isAscending,
@@ -122,9 +118,7 @@ private fun TransactionsListScreen(
                 },
                 modifier = Modifier.padding(PaddingValues(0.dp, 0.dp, 5.dp, 0.dp))
             )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
+            Spacer(Modifier.width(8.dp))
             DropdownMenuList(
                 title = "All types",
                 itemList = state.typeOptions,
@@ -134,22 +128,16 @@ private fun TransactionsListScreen(
         }
 
         if (state.selectedType != null) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = { onIntent(TransactionListIntent.ClearFilters) }) {
-                    Icon(Icons.Default.Clear, contentDescription = null)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Clear filters")
-                }
-            }
+            ClearFiltersButton { onIntent(TransactionListIntent.ClearFilters) }
         }
 
         if (state.transactions.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("No transactions found.")
             }
         } else {
             LazyColumn {
-                items(state.transactions) { transaction ->
+                items(state.transactions, key = { it.transaction.id }) { transaction ->
                     TransactionItem(transaction)
                 }
             }
@@ -158,50 +146,49 @@ private fun TransactionsListScreen(
 }
 
 @Composable
-fun TransactionItem(
-    transactionWPN: TransactionWithProductName
-) {
+private fun ClearFiltersButton(onClear: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = onClear) {
+            Icon(Icons.Default.Clear, contentDescription = null)
+            Spacer(Modifier.width(4.dp))
+            Text("Clear filters")
+        }
+    }
+}
+
+@Composable
+fun TransactionItem(transactionWPN: TransactionWithProductName) {
+    val isRestock = transactionWPN.transaction.type == TransactionType.restock.toString()
+    val icon = if (isRestock) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp
+    val color = if (transactionWPN.transaction.type == TransactionType.sale.toString())
+        Color(0xFFF44336) else Color(0xFF4CAF50)
+    val formattedDate = remember(transactionWPN.transaction.date) {
+        formatDate(transactionWPN.transaction.date)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(PaddingValues(0.dp, 8.dp, 0.dp, 8.dp)),
+            .padding(vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = if (transactionWPN.transaction.type == TransactionType.restock.toString()) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
+                Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "${transactionWPN.transaction.type.uppercase()} • ${
-                        formatDate(
-                            transactionWPN.transaction.date
-                        )
-                    }",
+                    text = "${transactionWPN.transaction.type.uppercase()} • $formattedDate",
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (transactionWPN.transaction.type == TransactionType.sale.toString()) Color(
-                        0xFFF44336
-                    ) else Color(0xFF4CAF50)
+                    color = color
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Product: ${transactionWPN.productName}",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Text(
-                text = "Quantity: ${transactionWPN.transaction.quantity}",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Spacer(Modifier.height(8.dp))
+            Text("Product: ${transactionWPN.productName}", style = MaterialTheme.typography.bodyLarge)
+            Text("Quantity: ${transactionWPN.transaction.quantity}", style = MaterialTheme.typography.bodyMedium)
 
             if (!transactionWPN.transaction.notes.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(Modifier.height(6.dp))
                 Text(
                     text = "Note: ${transactionWPN.transaction.notes}",
                     style = MaterialTheme.typography.bodySmall,

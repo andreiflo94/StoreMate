@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -43,11 +44,12 @@ fun SuppliersListRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box {
+    Box(Modifier.fillMaxSize()) {
         SuppliersListScreen(
             uiState = uiState,
-            onIntent = { intent -> viewModel.onIntent(intent) }
+            onIntent = viewModel::onIntent
         )
+
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -70,91 +72,84 @@ fun SuppliersListScreen(
             .padding(16.dp)
     ) {
         Text(text = "Suppliers", style = MaterialTheme.typography.headlineSmall)
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
         when (uiState) {
-            is UiState.Loading -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+            is UiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-
-            is UiState.Error -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(uiState.message)
-                }
+            is UiState.Error -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(uiState.message)
             }
-
-            is UiState.Success -> {
-                SuppliersListContent(uiState, onIntent)
-            }
+            is UiState.Success -> SuppliersListContent(uiState.data, onIntent)
         }
     }
 }
 
 @Composable
 private fun SuppliersListContent(
-    uiState: UiState.Success<SupplierListScreenState>,
+    state: SupplierListScreenState,
     onIntent: (SupplierListIntent) -> Unit
 ) {
-    val state = uiState.data
     val noSuppliers = state.suppliers.isEmpty()
 
-    Column(
-        Modifier
-            .fillMaxSize()
-    ) {
-
+    Column(Modifier.fillMaxSize()) {
         SearchBar(
             searchQuery = state.searchQuery,
             onSearchChanged = { onIntent(SupplierListIntent.SearchChanged(it)) }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
         if (state.searchQuery.isNotBlank()) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = { onIntent(SupplierListIntent.ClearSearch) }) {
-                    Icon(Icons.Filled.Clear, contentDescription = null)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Clear search")
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(8.dp))
+            ClearSearchButton(onIntent)
         }
 
         if (noSuppliers) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 64.dp),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "No suppliers found.",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Try adding some suppliers first.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            NoSuppliersMessage()
         } else {
             LazyColumn {
-                items(state.suppliers) { supplier ->
+                items(state.suppliers, key = { it.id }) { supplier ->
                     SupplierItem(
                         supplier = supplier,
-                        onIntent = onIntent,
-                        onDeleteClicked = { onIntent(SupplierListIntent.DeleteSupplier(supplier)) }
+                        onIntent = onIntent
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ClearSearchButton(onIntent: (SupplierListIntent) -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = { onIntent(SupplierListIntent.ClearSearch) }) {
+            Icon(Icons.Filled.Clear, contentDescription = null)
+            Spacer(Modifier.width(4.dp))
+            Text("Clear search")
+        }
+    }
+}
+
+@Composable
+private fun NoSuppliersMessage() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 64.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "No suppliers found.",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Try adding some suppliers first.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -162,9 +157,10 @@ private fun SuppliersListContent(
 @Composable
 fun SupplierItem(
     supplier: Supplier,
-    onIntent: (SupplierListIntent) -> Unit,
-    onDeleteClicked: () -> Unit
+    onIntent: (SupplierListIntent) -> Unit
 ) {
+    val onDeleteClicked = rememberUpdatedState(newValue = { onIntent(SupplierListIntent.DeleteSupplier(supplier)) })
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -174,21 +170,12 @@ fun SupplierItem(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(text = supplier.name, style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Contact: ${supplier.contactPerson}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Phone: ${supplier.phone}",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = "Email: ${supplier.email}",
-                style = MaterialTheme.typography.bodySmall
-            )
+            Spacer(Modifier.height(4.dp))
+            Text(text = "Contact: ${supplier.contactPerson}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Phone: ${supplier.phone}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "Email: ${supplier.email}", style = MaterialTheme.typography.bodySmall)
         }
-        IconButton(onClick = onDeleteClicked) {
+        IconButton(onClick = { onDeleteClicked.value() }) {
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete Supplier",
