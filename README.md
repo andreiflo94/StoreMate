@@ -4,6 +4,9 @@
 
 ---
 
+
+➡️ [Download StoreMate APK](https://github.com/andreiflo94/StoreMate/raw/master/builds/app-debug.apk)
+
 ## 🔑 Key Features
 
 - Full **CRUD operations** for Products and Suppliers  
