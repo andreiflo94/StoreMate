@@ -5,7 +5,7 @@
 ---
 
 
-➡️ [Download StoreMate APK](https://github.com/andreiflo94/StoreMate/raw/master/builds/app-debug.apk)
+➡️ [Download StoreMate APK](https://github.com/andreiflo94/StoreMate/raw/main/builds/app-debug.apk)
 
 ## 🔑 Key Features
 
