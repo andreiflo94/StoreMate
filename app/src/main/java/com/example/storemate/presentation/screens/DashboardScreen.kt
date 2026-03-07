@@ -28,11 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.storemate.domain.model.DashboardIntent
-import com.example.storemate.domain.model.DashboardScreenState
 import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.TransactionWithProductName
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.DashboardIntent
+import com.example.storemate.presentation.common.DashboardScreenState
 import com.example.storemate.presentation.viewmodels.DashboardViewModel
 
 @Composable

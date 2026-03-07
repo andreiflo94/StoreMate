@@ -4,12 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.storemate.common.BarcodeScanner
-import com.example.storemate.domain.model.AddProductEffect
-import com.example.storemate.domain.model.AddProductIntent
-import com.example.storemate.domain.model.AddProductScreenState
 import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.AddProductEffect
+import com.example.storemate.presentation.common.AddProductIntent
+import com.example.storemate.presentation.common.AddProductScreenState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

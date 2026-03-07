@@ -13,9 +13,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.turbine.test
-import com.example.storemate.domain.model.AddSupplierEffect
-import com.example.storemate.domain.model.AddSupplierIntent
 import com.example.storemate.domain.repositories.InventoryRepository
+import com.example.storemate.presentation.common.AddSupplierEffect
+import com.example.storemate.presentation.common.AddSupplierIntent
 import com.example.storemate.presentation.screens.AddSupplierScreen
 import com.example.storemate.presentation.viewmodels.AddSupplierViewModel
 import io.mockk.coEvery

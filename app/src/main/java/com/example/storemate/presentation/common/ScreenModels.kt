@@ -1,4 +1,8 @@
-package com.example.storemate.domain.model
+package com.example.storemate.presentation.common
+
+import com.example.storemate.domain.model.Product
+import com.example.storemate.domain.model.Supplier
+import com.example.storemate.domain.model.TransactionWithProductName
 
 enum class SnackbarType {
     Success,
@@ -19,10 +23,6 @@ sealed class AppRoute(val route: String) {
 }
 
 //region dashboard
-data class TransactionWithProductName(
-    val transaction: Transaction,
-    val productName: String
-)
 
 data class DashboardScreenState(
     val lowStockItems: List<Product>,

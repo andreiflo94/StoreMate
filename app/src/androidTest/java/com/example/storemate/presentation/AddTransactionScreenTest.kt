@@ -1,13 +1,14 @@
+package com.example.storemate.presentation
+
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import app.cash.turbine.test
-import com.example.storemate.domain.model.AddTransactionEffect
 import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.TransactionType
 import com.example.storemate.domain.repositories.InventoryRepository
-import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.AddTransactionEffect
 import com.example.storemate.presentation.screens.AddTransactionRoute
 import com.example.storemate.presentation.viewmodels.AddTransactionViewModel
 import io.mockk.Runs

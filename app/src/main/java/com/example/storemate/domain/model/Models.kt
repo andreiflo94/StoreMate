@@ -1,5 +1,11 @@
 package com.example.storemate.domain.model
 
+
+data class TransactionWithProductName(
+    val transaction: Transaction,
+    val productName: String
+)
+
 data class Product(
     val id: Int = 0,
     val name: String,

@@ -2,11 +2,11 @@ package com.example.storemate.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.storemate.domain.model.SupplierListEffect
-import com.example.storemate.domain.model.SupplierListIntent
-import com.example.storemate.domain.model.SupplierListScreenState
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.SupplierListEffect
+import com.example.storemate.presentation.common.SupplierListIntent
+import com.example.storemate.presentation.common.SupplierListScreenState
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

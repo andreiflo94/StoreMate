@@ -2,9 +2,9 @@ package com.example.storemate.presentation.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.storemate.domain.model.ProductListScreenState
 import com.example.storemate.domain.model.sampleProducts
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.ProductListScreenState
 
 
 @Composable

@@ -5,19 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.storemate.common.isValidEmail
 import com.example.storemate.common.isValidPhoneNumber
-import com.example.storemate.domain.model.AddSupplierEffect
-import com.example.storemate.domain.model.AddSupplierIntent
-import com.example.storemate.domain.model.AddSupplierScreenState
 import com.example.storemate.domain.model.Supplier
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.AddSupplierEffect
+import com.example.storemate.presentation.common.AddSupplierIntent
+import com.example.storemate.presentation.common.AddSupplierScreenState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AddSupplierViewModel(
+class
+AddSupplierViewModel(
     savedStateHandle: SavedStateHandle,
     private val repository: InventoryRepository
 ) : ViewModel() {

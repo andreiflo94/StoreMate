@@ -33,11 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.storemate.domain.model.Product
-import com.example.storemate.domain.model.ProductListIntent
-import com.example.storemate.domain.model.ProductListScreenState
 import com.example.storemate.presentation.UiState
 import com.example.storemate.presentation.common.DropdownMenuList
 import com.example.storemate.presentation.common.DropdownMenuMap
+import com.example.storemate.presentation.common.ProductListIntent
+import com.example.storemate.presentation.common.ProductListScreenState
 import com.example.storemate.presentation.common.SearchBar
 import com.example.storemate.presentation.viewmodels.ProductListViewModel
 

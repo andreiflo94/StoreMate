@@ -37,10 +37,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.storemate.domain.model.AddProductIntent
-import com.example.storemate.domain.model.AddProductScreenState
 import com.example.storemate.domain.model.Supplier
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.AddProductIntent
+import com.example.storemate.presentation.common.AddProductScreenState
 import com.example.storemate.presentation.viewmodels.AddProductViewModel
 
 @Composable

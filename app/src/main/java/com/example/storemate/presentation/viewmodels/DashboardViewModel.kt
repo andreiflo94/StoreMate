@@ -2,11 +2,11 @@ package com.example.storemate.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.storemate.domain.model.DashboardEffect
-import com.example.storemate.domain.model.DashboardIntent
-import com.example.storemate.domain.model.DashboardScreenState
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.DashboardEffect
+import com.example.storemate.presentation.common.DashboardIntent
+import com.example.storemate.presentation.common.DashboardScreenState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow

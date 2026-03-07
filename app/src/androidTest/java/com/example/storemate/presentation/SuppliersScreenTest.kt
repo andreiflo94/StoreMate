@@ -10,11 +10,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.storemate.domain.model.SupplierListEffect
-import com.example.storemate.domain.model.SupplierListIntent
-import com.example.storemate.domain.model.SupplierListScreenState
 import com.example.storemate.domain.model.sampleSuppliers
 import com.example.storemate.domain.repositories.InventoryRepository
+import com.example.storemate.presentation.common.SupplierListEffect
+import com.example.storemate.presentation.common.SupplierListIntent
+import com.example.storemate.presentation.common.SupplierListScreenState
 import com.example.storemate.presentation.screens.SuppliersListScreen
 import com.example.storemate.presentation.viewmodels.SupplierListViewModel
 import io.mockk.Runs

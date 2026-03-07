@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.storemate.domain.model.SnackbarType
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 

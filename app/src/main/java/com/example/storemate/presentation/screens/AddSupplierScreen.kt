@@ -28,9 +28,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.storemate.domain.model.AddSupplierIntent
-import com.example.storemate.domain.model.AddSupplierScreenState
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.AddSupplierIntent
+import com.example.storemate.presentation.common.AddSupplierScreenState
 import com.example.storemate.presentation.viewmodels.AddSupplierViewModel
 
 @Composable

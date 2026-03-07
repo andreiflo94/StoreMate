@@ -2,14 +2,14 @@ package com.example.storemate.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.storemate.domain.model.AddTransactionEffect
-import com.example.storemate.domain.model.AddTransactionIntent
-import com.example.storemate.domain.model.AddTransactionScreenState
 import com.example.storemate.domain.model.Product
 import com.example.storemate.domain.model.Transaction
 import com.example.storemate.domain.model.TransactionType
 import com.example.storemate.domain.repositories.InventoryRepository
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.AddTransactionEffect
+import com.example.storemate.presentation.common.AddTransactionIntent
+import com.example.storemate.presentation.common.AddTransactionScreenState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow

@@ -26,10 +26,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.storemate.domain.model.AddTransactionIntent
-import com.example.storemate.domain.model.AddTransactionScreenState
 import com.example.storemate.domain.model.TransactionType
 import com.example.storemate.presentation.UiState
+import com.example.storemate.presentation.common.AddTransactionIntent
+import com.example.storemate.presentation.common.AddTransactionScreenState
 import com.example.storemate.presentation.common.DropdownMenuList
 import com.example.storemate.presentation.common.DropdownMenuMap
 import com.example.storemate.presentation.viewmodels.AddTransactionViewModel

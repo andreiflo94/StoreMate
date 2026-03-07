@@ -36,14 +36,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.storemate.domain.model.TransactionListIntent
-import com.example.storemate.domain.model.TransactionListScreenState
 import com.example.storemate.domain.model.TransactionType
 import com.example.storemate.domain.model.TransactionWithProductName
 import com.example.storemate.presentation.UiState
 import com.example.storemate.presentation.common.DropdownMenuList
 import com.example.storemate.presentation.common.SearchBar
 import com.example.storemate.presentation.common.SortByDateCheckbox
+import com.example.storemate.presentation.common.TransactionListIntent
+import com.example.storemate.presentation.common.TransactionListScreenState
 import com.example.storemate.presentation.viewmodels.TransactionListViewModel
 import java.text.SimpleDateFormat
 import java.util.Date

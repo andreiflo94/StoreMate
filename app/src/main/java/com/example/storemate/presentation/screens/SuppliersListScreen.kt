@@ -32,10 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.storemate.domain.model.Supplier
-import com.example.storemate.domain.model.SupplierListIntent
-import com.example.storemate.domain.model.SupplierListScreenState
 import com.example.storemate.presentation.UiState
 import com.example.storemate.presentation.common.SearchBar
+import com.example.storemate.presentation.common.SupplierListIntent
+import com.example.storemate.presentation.common.SupplierListScreenState
 import com.example.storemate.presentation.viewmodels.SupplierListViewModel
 
 @Composable

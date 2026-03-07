@@ -12,9 +12,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.example.storemate.common.BarcodeScanner
-import com.example.storemate.domain.model.AddProductEffect
-import com.example.storemate.domain.model.AddProductIntent
 import com.example.storemate.domain.repositories.InventoryRepository
+import com.example.storemate.presentation.common.AddProductEffect
+import com.example.storemate.presentation.common.AddProductIntent
 import com.example.storemate.presentation.screens.AddProductRoute
 import com.example.storemate.presentation.viewmodels.AddProductViewModel
 import io.mockk.coEvery
