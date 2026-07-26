@@ -17,17 +17,15 @@ data class SupplierEntity(
     val address: String
 )
 
-@Entity(
-    foreignKeys = [
-        ForeignKey(
-            entity = SupplierEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["supplierId"],
-            onDelete = ForeignKey.SET_NULL
-        )
-    ],
-    indices = [Index("supplierId")]
-)
+/**
+ * No foreign key to [SupplierEntity] on purpose.
+ *
+ * The server owns referential integrity now; this table is a cache of what it
+ * reported. A product whose supplier was deleted server-side comes back with
+ * `supplierId = 0`, which a foreign key would reject — and the previous
+ * `SET_NULL` action could never have worked against a non-null column anyway.
+ */
+@Entity(indices = [Index("supplierId")])
 data class ProductEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,

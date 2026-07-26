@@ -1,0 +1,45 @@
+# StoreMate on-prem stack: API + PostgreSQL.
+#
+#   1. Set a real JWT secret:  export STOREMATE_JWT_SECRET="$(openssl rand -base64 48)"
+#   2. docker compose up -d --build
+#   3. Point the Android app at http://<this-machine-lan-ip>:8080
+#
+# For a single-shop install without Docker you can skip all of this and just run
+# `java -jar app.jar` — it defaults to a file-backed H2 database in ./data.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: storemate
+      POSTGRES_USER: storemate
+      POSTGRES_PASSWORD: ${STOREMATE_DB_PASSWORD:-storemate}
+    volumes:
+      - storemate-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U storemate -d storemate"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      STOREMATE_DB_URL: jdbc:postgresql://db:5432/storemate
+      STOREMATE_DB_USER: storemate
+      STOREMATE_DB_PASSWORD: ${STOREMATE_DB_PASSWORD:-storemate}
+      # The `:?` makes compose refuse to start until this is set, so a real
+      # install can never silently run on the built-in placeholder secret.
+      STOREMATE_JWT_SECRET: ${STOREMATE_JWT_SECRET:?set STOREMATE_JWT_SECRET before starting}
+      STOREMATE_SEED_DEMO: "false"
+    ports:
+      - "8080:8080"
+
+volumes:
+  storemate-db:

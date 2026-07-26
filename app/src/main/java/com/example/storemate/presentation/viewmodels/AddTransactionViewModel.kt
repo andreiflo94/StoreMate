@@ -75,13 +75,10 @@ class AddTransactionViewModel(
             if (!validateStockAvailability(state.type!!, quantityInt!!, product!!)) return@launch
 
             try {
-                val transaction = createTransaction(state, quantityInt)
-                repository.insertTransaction(transaction)
-
-                val newStockLevel = calculateNewStockLevel(state.type, quantityInt, product)
-                    ?: return@launch
-
-                repository.updateProduct(product.copy(currentStockLevel = newStockLevel))
+                // The server applies the stock movement as part of recording the
+                // transaction, so the app must not also write the new level —
+                // doing so would clobber a concurrent sale from another till.
+                repository.insertTransaction(createTransaction(state, quantityInt))
 
                 _effects.emit(AddTransactionEffect.TransactionSaved)
             } catch (e: Exception) {
@@ -113,6 +110,11 @@ class AddTransactionViewModel(
         } else true
     }
 
+    /**
+     * Fast local check so the user gets feedback without a round trip. The
+     * server re-checks and is the authority — the cached stock level may be
+     * stale if another device sold the same item.
+     */
     private suspend fun validateStockAvailability(
         type: String,
         quantity: Int,
@@ -133,21 +135,5 @@ class AddTransactionViewModel(
             quantity = quantity,
             notes = state.notes
         )
-    }
-
-    private suspend fun calculateNewStockLevel(
-        type: String,
-        quantity: Int,
-        product: Product
-    ): Int? {
-        return when (type) {
-            TransactionType.sale.toString() -> product.currentStockLevel - quantity
-            TransactionType.restock.toString() -> product.currentStockLevel + quantity
-            else -> {
-                _effects.emit(AddTransactionEffect.ShowErrorToUi("Invalid transaction type"))
-                updateState { it.copy(isSubmitting = false) }
-                null
-            }
-        }
     }
 }

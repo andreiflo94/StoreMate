@@ -12,6 +12,7 @@ enum class SnackbarType {
 }
 
 sealed class AppRoute(val route: String) {
+    data object Login : AppRoute("login")
     data object Dashboard : AppRoute("dashboard")
     data object Products : AppRoute("products")
     data object AddProduct: AppRoute("add_product")
@@ -22,12 +23,52 @@ sealed class AppRoute(val route: String) {
     data object Import : AppRoute("import")
 }
 
+//region login
+data class LoginScreenState(
+    /** Address of the shop's on-prem server, e.g. `192.168.1.10:8080`. */
+    val serverUrl: String = "",
+    val username: String = "",
+    val password: String = "",
+    /** Toggles the form between signing in and creating a new store. */
+    val isRegisterMode: Boolean = false,
+    val isSubmitting: Boolean = false,
+    val errorMessage: String? = null
+) {
+    fun isValid(): Boolean =
+        serverUrl.isNotBlank() && username.isNotBlank() && password.isNotBlank()
+}
+
+sealed interface LoginIntent {
+    data class ServerUrlChanged(val serverUrl: String) : LoginIntent
+    data class UsernameChanged(val username: String) : LoginIntent
+    data class PasswordChanged(val password: String) : LoginIntent
+    data object ToggleRegisterMode : LoginIntent
+    data object Submit : LoginIntent
+}
+
+sealed interface LoginEffect {
+    data object LoggedIn : LoginEffect
+    data class ShowError(val message: String) : LoginEffect
+}
+//endregion
+
 //region dashboard
 
 data class DashboardScreenState(
     val lowStockItems: List<Product>,
-    val recentTransactions: List<TransactionWithProductName>
+    val recentTransactions: List<TransactionWithProductName>,
+    /** Name of the store this device is signed in to, shown in the app bar. */
+    val storeName: String = "",
+    val syncStatus: SyncStatusUi = SyncStatusUi.Idle
 )
+
+/** Presentation-friendly view of [com.example.storemate.domain.repositories.SyncState]. */
+sealed interface SyncStatusUi {
+    data object Idle : SyncStatusUi
+    data object Syncing : SyncStatusUi
+    data class Synced(val atEpochMillis: Long) : SyncStatusUi
+    data class Offline(val message: String) : SyncStatusUi
+}
 
 sealed interface DashboardIntent {
     data object NavigateToProducts : DashboardIntent
@@ -35,6 +76,8 @@ sealed interface DashboardIntent {
     data object NavigateToStockManagement : DashboardIntent
     data object NavigateToTransactions : DashboardIntent
     data object NavigateToImport: DashboardIntent
+    data object Refresh : DashboardIntent
+    data object Logout : DashboardIntent
 }
 
 sealed interface DashboardEffect {
@@ -43,6 +86,9 @@ sealed interface DashboardEffect {
     data object NavigateToStockManagementEffect : DashboardEffect
     data object NavigateToTransactionsEffect : DashboardEffect
     data object NavigateToImportEffect : DashboardEffect
+    data object LoggedOut : DashboardEffect
+    data class ShowMessageToUi(val message: String) : DashboardEffect
+    data class ShowErrorToUi(val message: String) : DashboardEffect
 }
 //endregion
 

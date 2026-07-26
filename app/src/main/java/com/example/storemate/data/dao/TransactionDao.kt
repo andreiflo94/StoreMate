@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import com.example.storemate.data.dbentities.TransactionEntity
 import com.example.storemate.data.dbentities.TransactionWithProductNameEntity
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,17 @@ interface TransactionDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transactionEntity: TransactionEntity): Long
+
+    /** Used by sync to mirror a page of server data into the cache. */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(transactions: List<TransactionEntity>)
+
+    /** Mirrors a single server row, updating in place rather than replacing. */
+    @Upsert
+    suspend fun upsert(transactionEntity: TransactionEntity)
+
+    @Query("DELETE FROM TransactionEntity")
+    suspend fun deleteAll()
 
     @Query("SELECT * FROM TransactionEntity ORDER BY date DESC")
     fun getAllFlow(): Flow<List<TransactionEntity>>

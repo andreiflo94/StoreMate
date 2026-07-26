@@ -18,12 +18,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.storemate.domain.repositories.AuthRepository
 import com.example.storemate.presentation.common.AddProductEffect
 import com.example.storemate.presentation.common.AddSupplierEffect
 import com.example.storemate.presentation.common.AddTransactionEffect
 import com.example.storemate.presentation.common.AppRoute
 import com.example.storemate.presentation.common.CustomSnackBar
 import com.example.storemate.presentation.common.DashboardEffect
+import com.example.storemate.presentation.common.LoginEffect
 import com.example.storemate.presentation.common.ProductListEffect
 import com.example.storemate.presentation.common.SnackbarType
 import com.example.storemate.presentation.common.SupplierListEffect
@@ -33,18 +35,39 @@ import com.example.storemate.presentation.viewmodels.AddSupplierViewModel
 import com.example.storemate.presentation.viewmodels.AddTransactionViewModel
 import com.example.storemate.presentation.viewmodels.DashboardViewModel
 import com.example.storemate.presentation.viewmodels.ImportViewModel
+import com.example.storemate.presentation.viewmodels.LoginViewModel
 import com.example.storemate.presentation.viewmodels.ProductListViewModel
 import com.example.storemate.presentation.viewmodels.SupplierListViewModel
 import com.example.storemate.presentation.viewmodels.TransactionListViewModel
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AppNavGraph(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    /**
+     * Whether a saved session was restored on launch. Decides whether the app
+     * opens on the dashboard or asks the user to sign in to their shop server.
+     */
+    startLoggedIn: Boolean = false
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarTypeState = remember { mutableStateOf(SnackbarType.Default) }
+    val authRepository: AuthRepository = koinInject()
+
+    // Reacts from wherever the user currently is, not just the screen whose
+    // call happened to be the one the server rejected.
+    LaunchedEffect(Unit) {
+        authRepository.sessionExpired.collectLatest {
+            authRepository.logout()
+            navController.navigate(AppRoute.Login.route) {
+                popUpTo(0) { inclusive = true }
+            }
+            snackbarTypeState.value = SnackbarType.Error
+            snackbarHostState.showSnackbar(message = "Your session expired — please sign in again")
+        }
+    }
 
     Scaffold(
         snackbarHost = {
@@ -59,7 +82,11 @@ fun AppNavGraph(
         NavHost(
             modifier = Modifier.padding(paddingValues),
             navController = navController,
-            startDestination = AppRoute.Dashboard.route,
+            startDestination = if (startLoggedIn) {
+                AppRoute.Dashboard.route
+            } else {
+                AppRoute.Login.route
+            },
             enterTransition = {
                 fadeIn(animationSpec = tween(100))
             },
@@ -67,6 +94,29 @@ fun AppNavGraph(
                 fadeOut(animationSpec = tween(200))
             }
         ) {
+            composable(AppRoute.Login.route) {
+                val viewModel: LoginViewModel = koinViewModel()
+                LoginRoute(viewModel = viewModel)
+                LaunchedEffect(Unit) {
+                    viewModel.effects.collectLatest { effect ->
+                        when (effect) {
+                            LoginEffect.LoggedIn -> {
+                                navController.navigate(AppRoute.Dashboard.route) {
+                                    // Signing in must not leave the login screen
+                                    // reachable with the back button.
+                                    popUpTo(AppRoute.Login.route) { inclusive = true }
+                                }
+                            }
+
+                            is LoginEffect.ShowError -> {
+                                snackbarTypeState.value = SnackbarType.Error
+                                snackbarHostState.showSnackbar(message = effect.message)
+                            }
+                        }
+                    }
+                }
+            }
+
             composable(AppRoute.Dashboard.route) {
                 val viewModel: DashboardViewModel = koinViewModel<DashboardViewModel>()
                 DashboardRoute(viewModel = viewModel)
@@ -91,6 +141,24 @@ fun AppNavGraph(
 
                             DashboardEffect.NavigateToImportEffect -> {
                                 navController.navigate(AppRoute.Import.route)
+                            }
+
+                            DashboardEffect.LoggedOut -> {
+                                navController.navigate(AppRoute.Login.route) {
+                                    // Clear the whole graph so signed-out screens
+                                    // are not reachable by going back.
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
+
+                            is DashboardEffect.ShowMessageToUi -> {
+                                snackbarTypeState.value = SnackbarType.Info
+                                snackbarHostState.showSnackbar(message = quickAccessType.message)
+                            }
+
+                            is DashboardEffect.ShowErrorToUi -> {
+                                snackbarTypeState.value = SnackbarType.Error
+                                snackbarHostState.showSnackbar(message = quickAccessType.message)
                             }
                         }
                     }

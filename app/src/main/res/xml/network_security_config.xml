@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  On-prem StoreMate servers run on the shop's own LAN, addressed by IP or a
+  local hostname, and almost never have a TLS certificate. Cleartext HTTP has to
+  be permitted or the app could not reach them at all.
+
+  Traffic still never leaves the shop's network. If a deployment does terminate
+  TLS, using an https:// server address works unchanged.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <!-- Lets an operator trust their own internal CA for https:// setups. -->
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

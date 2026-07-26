@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.devtools.ksp)
 }
 
@@ -37,6 +38,8 @@ android {
     }
     buildFeatures {
         compose = true
+        // Used to keep HTTP logging out of release builds.
+        buildConfig = true
     }
     packaging {
         resources {
@@ -89,5 +92,12 @@ dependencies {
     implementation(libs.gpsCoroutines)
     implementation(libs.apache.poi)
     implementation(libs.xmlbeans)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.datastore.preferences)
+    testImplementation(libs.okhttp.mockwebserver)
 
 }

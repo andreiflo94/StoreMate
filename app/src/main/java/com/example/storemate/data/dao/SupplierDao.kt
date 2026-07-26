@@ -10,6 +10,17 @@ interface SupplierDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(supplierEntity: SupplierEntity): Long
 
+    /** Used by sync to mirror a page of server data into the cache. */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(suppliers: List<SupplierEntity>)
+
+    /** Mirrors a single server row, updating in place rather than replacing. */
+    @Upsert
+    suspend fun upsert(supplierEntity: SupplierEntity)
+
+    @Query("DELETE FROM SupplierEntity")
+    suspend fun deleteAll()
+
     @Update
     suspend fun update(supplierEntity: SupplierEntity)
 
