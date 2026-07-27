@@ -42,7 +42,8 @@ fun TransactionEntity.toDomain() = Transaction(
 
 fun TransactionWithProductNameEntity.toDomain() = TransactionWithProductName(
     transaction = transactionEntity.toDomain(),
-    productName = productName
+    // A cached transaction whose product is gone still belongs in the history.
+    productName = productName ?: "Unknown product"
 )
 //endregion
 

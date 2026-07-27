@@ -19,6 +19,10 @@ class ServerUrlInterceptor(private val config: NetworkConfig) : Interceptor {
             .scheme(server.scheme)
             .host(server.host)
             .port(server.port)
+            // Keep any path the shop's address carries (a reverse-proxied install
+            // like http://shop.local/storemate). Dropping it silently sent every
+            // call to /api/... on the proxy root, which just 404s.
+            .encodedPath(server.encodedPath.trimEnd('/') + request.url.encodedPath)
             .build()
 
         return chain.proceed(request.newBuilder().url(rewritten).build())
@@ -37,7 +41,9 @@ class AuthInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val token = config.token
-        val isPublic = request.url.encodedPath in PUBLIC_PATHS
+        // Suffix match, not equality: [ServerUrlInterceptor] may have prefixed the
+        // path with the server's own base path before this interceptor runs.
+        val isPublic = PUBLIC_PATHS.any { request.url.encodedPath.endsWith(it) }
 
         val authorized = if (token.isNullOrBlank() || isPublic) {
             request

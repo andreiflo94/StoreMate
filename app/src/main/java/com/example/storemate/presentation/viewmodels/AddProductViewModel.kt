@@ -36,7 +36,8 @@ class AddProductViewModel(
     init {
         if (savedStateHandle.contains("productId")) {
             savedStateHandle.get<Int>("productId")?.let { productId ->
-                if (productId != 1) {
+                // -1 is the nav graph's "no id" default, i.e. add mode.
+                if (productId != NO_PRODUCT_ID) {
                     loadProduct(productId)
                 }
             }
@@ -234,5 +235,10 @@ class AddProductViewModel(
         viewModelScope.launch {
             _effects.emit(AddProductEffect.NavigateToAddSupplier)
         }
+    }
+
+    private companion object {
+        /** Matches the `productId` nav argument's default in `AppNavGraph`. */
+        const val NO_PRODUCT_ID = -1
     }
 }

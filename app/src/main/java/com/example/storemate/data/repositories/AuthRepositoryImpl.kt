@@ -11,7 +11,9 @@ import com.example.storemate.data.remote.dto.AuthResponseDto
 import com.example.storemate.data.remote.toUserFacingException
 import com.example.storemate.domain.model.Session
 import com.example.storemate.domain.repositories.AuthRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class AuthRepositoryImpl(
     private val api: StoreMateApi,
@@ -49,7 +51,10 @@ class AuthRepositoryImpl(
         sessionStore.clearCredentials()
         // The cache mirrors one store's data. Leaving it behind would show the
         // previous user's inventory to whoever signs in next.
-        db.clearAllTables()
+        //
+        // clearAllTables() blocks and refuses to run on the main thread, and both
+        // callers (the Logout button and the session-expiry handler) are on it.
+        withContext(Dispatchers.IO) { db.clearAllTables() }
     }
 
     private suspend fun authenticate(

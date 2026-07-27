@@ -75,7 +75,7 @@ fun ImportScreen(
 fun ImportStatus(importState: ImportViewModel.ImportState) {
     when (importState) {
         is ImportViewModel.ImportState.Loading -> Text("Importing...")
-        is ImportViewModel.ImportState.Success -> Text("Import done ✅")
+        is ImportViewModel.ImportState.Success -> Text("Import done ✅\n${importState.summary}")
         is ImportViewModel.ImportState.Error -> Text("Error: ${importState.message}")
         else -> {}
     }

@@ -61,6 +61,11 @@ data class TransactionEntity(
 data class TransactionWithProductNameEntity(
     @Embedded val transactionEntity: TransactionEntity,
 
+    /**
+     * Nullable because the query LEFT JOINs the product: a row whose product is
+     * missing yields SQL NULL, which Room would otherwise write straight into a
+     * non-null Kotlin field.
+     */
     @ColumnInfo(name = "productName")
-    val productName: String
+    val productName: String?
 )

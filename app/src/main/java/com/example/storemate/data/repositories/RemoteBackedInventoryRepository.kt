@@ -74,9 +74,18 @@ class RemoteBackedInventoryRepository(
         db.productDao().deleteAll()
         db.supplierDao().deleteAll()
 
+        // The three fetches are separate requests, so another till can create a
+        // product in between and leave us holding a transaction for a product
+        // this pass never saw. Dropping those rows costs one stale history entry
+        // until the next sync; keeping them fails the whole sync on the foreign
+        // key and leaves the cache empty.
+        val knownProductIds = products.mapTo(mutableSetOf()) { it.id }
+
         db.supplierDao().insertAll(suppliers.map { it.toEntity() })
         db.productDao().insertAll(products.map { it.toEntity() })
-        db.transactionDao().insertAll(transactions.map { it.toEntity() })
+        db.transactionDao().insertAll(
+            transactions.filter { it.productId in knownProductIds }.map { it.toEntity() }
+        )
     }
 
     // -----------------------------------------------------------------------

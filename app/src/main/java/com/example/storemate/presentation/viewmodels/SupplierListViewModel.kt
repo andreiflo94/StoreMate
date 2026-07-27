@@ -104,12 +104,13 @@ class SupplierListViewModel(
                 repository.deleteSupplier(intent.supplier)
                 emitEffect(SupplierListEffect.ShowMessageToUi("Supplier deleted"))
             } catch (e: Exception) {
-                val errorMessage = if (e.message?.contains("constraint") == true) {
-                    "Failed to delete supplier, first delete supplier's products"
-                } else {
-                    "Failed to delete supplier: ${e.message}"
-                }
-                emitEffect(SupplierListEffect.ShowErrorToUi(errorMessage))
+                // The server detaches the supplier's products rather than
+                // refusing, so whatever comes back here is worth showing as-is.
+                emitEffect(
+                    SupplierListEffect.ShowErrorToUi(
+                        "Failed to delete supplier: ${e.message}"
+                    )
+                )
             }
         }
     }
