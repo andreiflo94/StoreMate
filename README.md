@@ -149,3 +149,10 @@ Contributions, suggestions, or bug reports are welcome!
 Feel free to open an **issue** or submit a **pull request**.
 
 ---
+
+## 📄 License
+
+Released under the [MIT License](LICENSE).
+
+This project depends on Google Play Services (Code Scanner), which is
+governed by Google's terms rather than an open source license.
